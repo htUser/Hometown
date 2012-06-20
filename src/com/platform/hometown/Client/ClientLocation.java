@@ -16,7 +16,22 @@ public class ClientLocation {
 	String address = new String();
 	ArrayList <Counties>countiesAvailable = new ArrayList<Counties>();
 	
-
+	/**
+	 * Creates a new ClientLocation object with nothing initialized.  This is just for the test suite.
+	 */
+	public ClientLocation(Double locLat, Double locLong){
+		super();
+		locationLat = locLat;
+		locationLong = locLong;
+	}
+	
+	/**
+	 * Creates a new ClientLocation object with nothing initialized.  This is just for the test suite.
+	 */
+	public ClientLocation(){
+		super();
+		
+	}
 	
 	/**
 	 * 
@@ -465,7 +480,7 @@ public class ClientLocation {
 	
 	
 	public void filterByMiles(String miles) {
-		
+		double d = Double.parseDouble(miles);
 		
 		for(int i=0; i<this.getCounties().size();i++){
 			for(int j=0; j<this.getCounties().get(i).getPlacesAvailable().size();j++){
@@ -474,7 +489,7 @@ public class ClientLocation {
 				
 				double distance = processProximity.calculateDistance(p.getLongitude(), this.getLocationLong(), p.getLat(), this.getLocationLat());
 				
-				if(distance <= Double.parseDouble(miles)){
+				if(distance <= d){
 					
 					this.getCounties().get(i).setSelected(true);
 					this.getCounties().get(i).getPlacesAvailable().get(j).setSelected(true);
@@ -539,6 +554,57 @@ public class ClientLocation {
 	
 		
 		
+	}
+	
+	
+	@TestMethod
+	public void testFilterByMilesNumberFormatException() throws Exception
+	{
+	   
+	    String expect = "class java.lang.NumberFormatException";
+	    String actual = new String();
+	    ClientLocation cl = new ClientLocation();
+	    String miles = "k";
+	    
+	    
+	    try {
+	    	
+	    	cl.filterByMiles(miles);
+	    } catch (Exception e){
+	    	actual = "" + e.getClass();
+	    }
+	    
+	   
+	    RunTest.assertEquals(expect, actual);
+	    
+	    
+	}
+	
+	@TestMethod
+	public void testFilterByMiles() throws Exception
+	{
+	    ClientLocation cl = new ClientLocation(42.955896, -85.66389);
+	    
+	    Counties c= new Counties();
+	    Places p = new Places("test", "testName", 42.9459, -85.613641);
+	    ArrayList<Places> allP = new ArrayList<Places>();
+	    allP.add(p);
+	    
+	    c.setPlacesAvailable(allP);
+	    ArrayList<Counties> allC = new ArrayList<Counties>();
+	    allC.add(c);
+	    cl.setCountiesAvailable(allC);
+	    
+	    
+	    String miles = "10";
+	    cl.filterByMiles(miles);
+	    
+	    String actual = cl.getCounties().get(0).getPlacesAvailable().get(0).getSelected().toString();
+	    String expect = "true";
+	    
+	    RunTest.assertEquals(expect, actual);
+	    
+	    
 	}
 	
 	
