@@ -130,7 +130,7 @@ function checkAll(me, boxesToCheck )
 					
 					
 					
-					<tr><td colspan="2" ><hr></td></tr>
+					<tr><td colspan="<%=countKeyWords %>" ><hr></td></tr>
 							
 							
 							
