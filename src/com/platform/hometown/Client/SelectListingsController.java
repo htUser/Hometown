@@ -15,10 +15,11 @@ public class SelectListingsController implements Controller {
 	public ControllerResponse execute(HashMap params) throws Exception {
 		
 		String myAction = (String)params.get("action");
-		Functions.debug("action is "+myAction);
-		
 		String cId; //campaign id
+		
+		
 		if(params.containsKey("myValue")){
+			
 			cId = (String)params.get("myValue");
 			//Functions.debug("cId is "+cId);
 				
