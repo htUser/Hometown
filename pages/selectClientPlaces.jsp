@@ -11,6 +11,7 @@
 	String myAction = (String)params.get("action");
 	ArrayList counties = cl.getCounties();
 	counties.trimToSize();
+	String error = (String)params.get("errorMsg");
 	
 	
 		
@@ -94,6 +95,10 @@ function checkAll(me, boxesToCheck )
         color: #3366CC;
         text-decoration: none;
 }
+.c2 {
+        color: red;
+        text-decoration: none;
+}
 
 .form1 {
         background-color: #CCCC99;
@@ -143,6 +148,9 @@ function checkAll(me, boxesToCheck )
 		
 		<tr>
 			<td class="c1">Preselect places served from this location based on a distance:</td></tr>
+			<% if((error!=null)&&(error.length()!=0)){ %>
+			<tr> <td class="c2" ><%=error %></td></tr>
+			<%} %>
 		<tr>	<td class="c1"><button type="button" onclick="submitSelectMiles()">Filter By Distance</button> <input class="c1" size="4" type="text" name="miles" value="<% if((String)params.get("miles")!=null){ %><%=(String)params.get("miles") %><%}%>"> Miles 
 			<br><br></td></tr>
 			
