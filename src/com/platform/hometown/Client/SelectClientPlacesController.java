@@ -83,9 +83,7 @@ public class SelectClientPlacesController implements Controller {
 			if((miles!=null)&&(((String)params.get("miles")).length()!=0)){
 						
 				try{
-					//check if miles is integer
-					double d = Double.parseDouble(miles);
-					
+										
 					cl.filterByMiles(miles);
 				} catch (Exception e){
 					//miles value is not parsable - redisplay the page with error
