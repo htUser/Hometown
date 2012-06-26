@@ -120,30 +120,51 @@ public class SelectClientPlacesController implements Controller {
 				double longPage = 0;
 				String latOperator = new String();
 				String longOperator = new String();
+				Boolean errorOnLatLong = false;
 			
 			
-				
-				if(((String)params.get("filterLat"+llCount)).length()!=0){
+				try{
+					if(((String)params.get("filterLat"+llCount)).length()!=0){
 		
-					latDataHere = true;
-					latPage = Double.parseDouble((String)params.get("filterLat"+llCount));
-					latOperator = (String)params.get("latOperator"+llCount);
-					//Functions.debug("latDataHere"+latPage);
+						latDataHere = true;
+						latPage = Double.parseDouble((String)params.get("filterLat"+llCount));
+						latOperator = (String)params.get("latOperator"+llCount);
+						//Functions.debug("latDataHere"+latPage);
+					}
+				} catch (Exception e){
+					//lat/long value is not parsable - redisplay the page with error
+					params.put("filterLat"+llCount, "0");
+					params.put("LLerrorMsg", "Please use a numeric value.");
+					params.put("LLerrorCounty", llCount);
+					cl = this.setSelectedFromPage(params, cl);
+					errorOnLatLong = true;
+					
 				}
+			
 							
-			
-				if(((String)params.get("filterLong"+llCount)).length()!=0){
+				try{
+					if(((String)params.get("filterLong"+llCount)).length()!=0){
 		
-					longDataHere = true;
-					longPage = Double.parseDouble((String)params.get("filterLong"+llCount));
-					longOperator = (String)params.get("longOperator"+llCount);
-					//Functions.debug("longDataHere"+longPage);
+						longDataHere = true;
+						longPage = Double.parseDouble((String)params.get("filterLong"+llCount));
+						longOperator = (String)params.get("longOperator"+llCount);
+						//Functions.debug("longDataHere"+longPage);
+					}
+				} catch (Exception e){
+					//lat/long value is not parsable - redisplay the page with error
+					params.put("filterLong"+llCount, "0");
+					params.put("LLerrorMsg", "Please use a numeric value.");
+					params.put("LLerrorCounty", llCount);
+					cl = this.setSelectedFromPage(params, cl);
+					errorOnLatLong = true;
+					
 				}
 			
-				//reset all the places to unselected first, then filter by LL to set selected
-				cl.getCounties().get(Integer.parseInt(llCount)).resetPlacesAvailable();			
-				cl.filterByLL(Integer.parseInt(llCount), latDataHere, latPage, longDataHere, longPage, latOperator, longOperator);
-				
+				if(errorOnLatLong!=true){
+					//reset all the places to unselected first, then filter by LL to set selected
+					cl.getCounties().get(Integer.parseInt(llCount)).resetPlacesAvailable();			
+					cl.filterByLL(Integer.parseInt(llCount), latDataHere, latPage, longDataHere, longPage, latOperator, longOperator);
+				}
 			}
 				
 				
