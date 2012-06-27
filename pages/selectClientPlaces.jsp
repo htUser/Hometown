@@ -12,6 +12,7 @@
 	ArrayList counties = cl.getCounties();
 	counties.trimToSize();
 	String error = (String)params.get("errorMsg");
+	String LLerror = (String)params.get("LLerrorMsg");
 	
 	
 		
@@ -165,7 +166,9 @@ function checkAll(me, boxesToCheck )
 		
 		
 	<tr><td align="top" class="td1"><table id="places">
-			
+			<%if((LLerror!=null)&&(LLerror.length()!=0)){ %>
+				<tr><td class="c2"><%=LLerror %>  </td></tr>
+			<%} %>
 			<tr>
 				<% 
 				int countPlaces=0;
@@ -203,6 +206,7 @@ function checkAll(me, boxesToCheck )
 					<td class="td1">
 						<table>
 							<tr><td colspan="2" class="td1"><button name="llButton<%=k %>"  value="<%=k %>" id="countyButton" type="button" onclick="submitSelectLL(<%=k%>)">Filter By Lat/Long</button></td></tr>
+							
 							<tr><td class="td1"><select name="latOperator<%=k %>" >
 										<option id="countyItem" value="lessThan">&#8804;</option>
 										<option id="countyItem" value="greaterThan">&#8805;</option>
