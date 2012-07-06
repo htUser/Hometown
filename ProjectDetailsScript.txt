@@ -1,0 +1,87 @@
+function populate() 
+{ 
+
+// Create a communications object. 
+var xmlhttp1; 
+if (window.XMLHttpRequest) { 
+// code for IE7+, Firefox, Chrome, Opera, Safari 
+xmlhttp1=new XMLHttpRequest(); 
+} 
+else { 
+// code for IE6, IE5 
+xmlhttp1=new ActiveXObject("Microsoft.XMLHTTP"); 
+} 
+
+// Configure the comms object with the function 
+// that runs when a response is received. 
+xmlhttp1.onreadystatechange=function() { 
+if (xmlhttp1.readyState==4 && xmlhttp1.status==200) { 
+// Success. Insert returned data into the page. 
+
+text = "<pre>" + xmlhttp1.responseText + "</pre>"; 
+var reply = eval('(' + xmlhttp1.responseText + ')'); 
+
+
+d = reply.platform.record.description; 
+p = reply.platform.record.place.content; 
+p1 = reply.platform.record.place.displayValue; 
+t = reply.platform.record.service_t.content; 
+t1 = reply.platform.record.service_t.displayValue; 
+s = reply.platform.record.site_user.content; 
+s1 = reply.platform.record.site_user.displayValue; 
+
+
+
+document.mainForm.service_specs.value=d; 
+document.mainForm.place.value=p; 
+document.mainForm.place_name.value=p1; 
+document.mainForm.service_type.value=t; 
+document.mainForm.service_type_name.value=t1; 
+document.mainForm.site_user.value=s; 
+document.mainForm.site_user_name.value=s1; 
+
+// Set up the request and send it to the server 
+
+resource = "/networking/rest/record/Site_User/"+document.mainForm.site_user.value+"?alt=json"; 
+xmlhttp1.open("GET", resource, async); 
+xmlhttp1.send(); 
+
+if (xmlhttp1.readyState==4 && xmlhttp1.status==200) { 
+// Success. Insert returned data into the page. 
+
+text2 = "<pre>" + xmlhttp1.responseText + "</pre>"; 
+var reply2 = eval('(' + xmlhttp1.responseText + ')'); 
+
+
+fn = reply2.platform.record.first_name; 
+ln = reply2.platform.record.last_name; 
+//un = reply2.platform.record.user_name; 
+
+document.mainForm.first_name.value = fn; 
+document.mainForm.last_name.value = ln; 
+//document.mainForm.user_name.value = un; 
+
+
+} 
+
+} 
+} 
+
+
+//get the record id 
+var recordId = document.mainForm.project.value; 
+
+
+// Set up the request and send it to the server 
+resource = "/networking/rest/record/Service_Project/"+recordId+"?alt=json"; 
+
+//resource = "/networking/rest/record/Site_User/2026839940?alt=json"; 
+
+
+async = false; 
+xmlhttp1.open("GET", resource, async); 
+xmlhttp1.send(); 
+
+
+
+} 
