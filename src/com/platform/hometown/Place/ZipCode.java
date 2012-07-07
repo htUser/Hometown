@@ -9,7 +9,7 @@ public class ZipCode {
 	 * @param p Parameters from the Place record page
 	 * @throws Exception
 	 */
-	public void fillZipCodes(Parameters p) throws Exception{
+	public void fillZipsCodes(Parameters p) throws Exception{
 		
 		String topZips = new String();
 		String allZips = new String();
