@@ -1,5 +1,7 @@
 package com.platform.hometown.Territory;
 
+import java.util.ArrayList;
+
 import com.platform.*;
 import com.platform.api.Functions;
 import com.platform.api.Logger;
@@ -7,6 +9,7 @@ import com.platform.api.PLATFORM;
 import com.platform.api.Parameters;
 import com.platform.api.ParametersIterator;
 import com.platform.api.Result;
+import com.platform.hometown.Client.*;
 
 
 public class FillTopPlaces {
@@ -17,49 +20,83 @@ public class FillTopPlaces {
 		//get territory id
 		String territory = p.get("id");
 		
-		if((territory!=null)&&(territory.length()<0)){
+		if((territory!=null)&&(territory.length()!=0)){
 			
 			//get all places related to that territory
 			Result result;
-			result = Functions.searchRecords ("Places", "h_type, pop2009, place, territory, id", "territory equals '" + territory + "'", "h_type", "asc", "pop2009", "desc", 0,6);
+			result = Functions.searchRecords ("Places", "h_type, pop2009, place, territory, id", "territory equals '" + territory + "'", "h_type", "asc", "pop2009", "desc", 0,20);
 			
 			
 			//loop thru and create the top places string
 			if(result.getCode()<0){
 				 
-				 String msg = "Error finding Place Records";
+				 String msg = "Error finding Place Records. Territory id is "+territory;
 				 Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
 				 Functions.throwError(msg + "."); 
 
 			}else if(result.getCode()==0){
 				//no records found
 				
-				String msg = "Error: No Place records Found";
+				String msg = "Error: No Place records Found. Territory id is "+territory;
 				Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
 				Functions.throwError(msg + "."); 
 				
 			}else {
 				//Success
 				
-				Logger.info("got the place records", debug_category);
-				int count = 0;
-				
-				
+				ArrayList<Places> orderedList = new ArrayList<Places>();
+								
+				Logger.info("got the place records. Territory id is "+territory, debug_category);
+								
 				ParametersIterator iterator = result.getIterator();
 				while(iterator.hasNext())
 				  {
 				    Parameters params = iterator.next();
 				    
+				    //create object put in the list in the correct order
+				    Places place = new Places();
+				    place.setPlaceName((String)params.get("place"));
+				    place.sethType((String)params.get("h_type"));
+				    place.setPop2009((String)params.get("pop2009"));
 				    
-				    //loop thru and create 6 top places string - should be already ordered by the sql
-					if(count<6){
-				    	topPlaces = topPlaces.concat((String)params.get("place") + " ");
+				    
+				    //only put in the list if it is not a Hub
+				    if(place.gethType().contains("Hub")==false){
+				    	
+				    	Boolean foundSpot = false;
+			    						    		
+				    	
+			    		//loop thru and compare the new place with the places in the ordered list to see if the new place goes before any place already in the list
+			    		for(int i=0; i<orderedList.size();i++){
+			    			
+			    			Places orderedItem = orderedList.get(i);
+			    							    			
+			    			if(goesBefore(orderedItem, place)==true){
+			    				foundSpot = true;
+			    				orderedList.add(i,place);
+			    				break;
+			    			}
+			    		}
+			    		
+			    		//if the new place does not go before any items in the list, add it at the end
+			    		if(foundSpot==false){
+			    			//Functions.debug("adding new place at end of list");
+			    			orderedList.add(place);
+			    		}
 				    }
 				    
-				    count++;
-				  }
-			
-			
+				}
+				
+				//loop thru and create 6 top places string 
+				for(int i = 0; i < 6; i++){
+			    	topPlaces = topPlaces.concat(orderedList.get(i).getPlaceName());
+			    	
+			    	if (i<5){
+			    		topPlaces = topPlaces.concat(", ");
+			    	}
+			    }
+			    
+			    
 				//update the territory record
 				Parameters params = new Parameters();
 				params.add("top_subs", topPlaces);
@@ -86,6 +123,78 @@ public class FillTopPlaces {
 		
 		
 		
+	}
+	
+	
+	/**
+	 * Returns true when the new place goes before the place in the list.  The order is first by Sub01 to Sub09, 
+	 * then by population with the greatest population first.
+	 * @param placeInList
+	 * @param newPlace
+	 * @return
+	 */
+	private boolean goesBefore(Places placeInList, Places newPlace){
+		String oldHType = placeInList.gethType();
+		String newHType = newPlace.gethType();
+		
+		//item in the list has a h_type
+		if((oldHType!=null)&&(oldHType.length()!=0)){
+			
+			//new item has an h_type
+			if((newHType!=null)&&(newHType.length()!=0)){
+				
+				//compare the two h_types
+				if(oldHType.compareToIgnoreCase(newHType) > 0){
+					//new h_type is less than the old h_type so it goes before in the list
+					//Functions.debug("new h_type is less than old so goes before, returning true");
+					
+					return true;
+				} else{
+					//new h_type is greater than the old h_type so keep looking for it's place
+					//Functions.debug("new h_type is greater than so returning false");
+					return false;
+				}
+				
+			} else {
+				//new item does not have an h_type, so it cannot go before the current item, keep looking for it's place
+				//Functions.debug("New item does not have an h_type so keep looking");
+				return false;
+			}
+			
+			
+		} else if((newHType!=null)&&(newHType.length()!=0)){
+			//the item in the list does not have an h_type, but the new item does, so it must come before the old item
+			return true;
+			
+		} else {
+			//neither item has an h_type, so we must compare population
+			int listPop;
+			int newPop;
+			
+			//compare population values
+			if((placeInList.getPop2009()==null)||(placeInList.getPop2009().length()==0)){
+				listPop = 0;
+			} else {
+				listPop = Integer.parseInt(placeInList.getPop2009());
+			}
+			
+			if((newPlace.getPop2009()==null)||(newPlace.getPop2009().length()==0)){
+				newPop = 0;
+			} else {
+				newPop = Integer.parseInt(newPlace.getPop2009());
+			}
+			
+			
+			if(newPop > listPop){
+				//new item has a bigger population so it goes first
+				return true;
+			} else {
+				//new item has a smaller population so keep looking for it's place
+				return false;
+			}
+		}
+		
+	
 	}
 
 }
