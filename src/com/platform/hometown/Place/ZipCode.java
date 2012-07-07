@@ -25,15 +25,15 @@ public class ZipCode {
 			result = Functions.searchRecords ("Zips", "scp_code, pop2010, zip_code, id", "scp_code equals '" + place + "'", "pop2010", "desc", "zip_code", "asc", 0,200);
 			
 			if(result.getCode()<0){
-				 //throw new Exception("Error finding Zip Code Records");
-				 String msg = "Error finding Zip Code Records";
+				
+				 String msg = "Error finding Zip Code Records. Place id is "+place;
 				 Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
 				 Functions.throwError(msg + "."); 
 
 			}else if(result.getCode()==0){
 				//no records found
-				//throw new Exception("Error: No Zip Code records Found");
-				String msg = "Error: No Zip Code records Found";
+				
+				String msg = "Error: No Zip Code records Found Place id is "+place;
 				Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
 				Functions.throwError(msg + "."); 
 				
