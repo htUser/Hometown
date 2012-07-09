@@ -14,6 +14,7 @@ import com.platform.hometown.Client.*;
 
 public class FillTopPlaces {
 	public void fillTopPlaces(Parameters p) throws Exception{
+		
 		String topPlaces = new String();
 		String debug_category = "FillTopPlaces";
 		
@@ -24,7 +25,7 @@ public class FillTopPlaces {
 			
 			//get all places related to that territory
 			Result result;
-			result = Functions.searchRecords ("Places", "h_type, pop2009, place, territory, id", "territory equals '" + territory + "'", "h_type", "asc", "pop2009", "desc", 0,20);
+			result = Functions.searchRecords ("Places", "h_type, pop2009, place, territory, id", "territory equals '" + territory + "'", "h_type", "asc", "pop2009", "desc", 0,200);
 			
 			
 			//loop thru and create the top places string
@@ -59,9 +60,26 @@ public class FillTopPlaces {
 				    place.sethType((String)params.get("h_type"));
 				    place.setPop2009((String)params.get("pop2009"));
 				    
+				   
 				    
-				    //only put in the list if it is not a Hub
-				    if(place.gethType().contains("Hub")==false){
+				    Boolean validPlace = true;
+				   
+				    //do not put in those places that do not have a h_type or a population or are a Hub
+					if(((place.gethType()==null)||(place.gethType().length()==0)) && ((place.getPop2009()==null)||(place.getPop2009().length()==0))){
+						
+						validPlace = false;
+					} else if((place.gethType()!=null)||(place.gethType().length()!=0)){ 
+						
+						if(place.gethType().contains("Hub")==true){
+							
+							validPlace = false;
+						}
+					}
+					 
+				    //only put in the list if it is a valid place
+				    if(validPlace==true){
+				    	
+				    	//Functions.debug("place adding is"+place.getPlaceName());
 				    	
 				    	Boolean foundSpot = false;
 			    						    		
@@ -82,18 +100,31 @@ public class FillTopPlaces {
 			    		if(foundSpot==false){
 			    			//Functions.debug("adding new place at end of list");
 			    			orderedList.add(place);
+			    			
 			    		}
 				    }
 				    
 				}
 				
+				
+				
 				//loop thru and create 6 top places string 
-				for(int i = 0; i < 6; i++){
-			    	topPlaces = topPlaces.concat(orderedList.get(i).getPlaceName());
-			    	
-			    	if (i<5){
-			    		topPlaces = topPlaces.concat(", ");
-			    	}
+				int placesSize = 0;
+				
+				if(orderedList.size()<6){
+					placesSize = orderedList.size();
+				} else {
+					placesSize = 6;
+				}
+					
+				
+				for(int i = 0; i < placesSize; i++){
+					if(i != 0){
+						topPlaces = topPlaces.concat(", ");
+					}
+					
+					topPlaces = topPlaces.concat(orderedList.get(i).getPlaceName());
+					
 			    }
 			    
 			    
@@ -134,6 +165,7 @@ public class FillTopPlaces {
 	 * @return
 	 */
 	private boolean goesBefore(Places placeInList, Places newPlace){
+		
 		String oldHType = placeInList.gethType();
 		String newHType = newPlace.gethType();
 		
@@ -164,6 +196,7 @@ public class FillTopPlaces {
 			
 		} else if((newHType!=null)&&(newHType.length()!=0)){
 			//the item in the list does not have an h_type, but the new item does, so it must come before the old item
+			//Functions.debug("item in the list does not have an h_type, so new comes before old");
 			return true;
 			
 		} else {
@@ -187,9 +220,11 @@ public class FillTopPlaces {
 			
 			if(newPop > listPop){
 				//new item has a bigger population so it goes first
+				//Functions.debug("new item has a bigger pop so it goes first");
 				return true;
 			} else {
 				//new item has a smaller population so keep looking for it's place
+				//Functions.debug("new item has a smaller population os keep looking for its place");
 				return false;
 			}
 		}
