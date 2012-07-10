@@ -16,8 +16,7 @@
 %>
 
 <head>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js">
-</script>
+
 <script type="text/javascript">
 
 var llCounty;
@@ -30,7 +29,7 @@ function submitSave(){
 
 </script>
 
-
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript">
 
 function checkAll(me, boxesToCheck )
