@@ -49,6 +49,11 @@ public class SelectListingsController implements Controller {
 						
 						campaign.getKeyWords().get(i).getCountiesAvailable().get(j).setSelected(true);	
 						
+						//String savePtName = "savePoint"+i;
+						
+						//Functions.addSavePoint(savePtName);
+						//Functions.debug("Save point exists "+Functions.doesSavePointExist("savePoint"+i));
+						
 						//save to db
 						Parameters newListingParams = Functions.getParametersInstance();
 						newListingParams.add("service_t", campaign.getServiceType());
@@ -69,6 +74,12 @@ public class SelectListingsController implements Controller {
 						    String msg = "Listing could not be added";
 						    Functions.debug(msg + ":\n" + result.getMessage());  	// Log details & ignore error
 						    resp.setTargetPage("success.jsp");
+						    
+						    //Functions.debug("Save point name "+ savePtName +" exists "+Functions.doesSavePointExist(savePtName));
+							
+						    //if(Functions.doesSavePointExist(savePtName)){				    
+							//	Functions.rollbackToSavePoint(savePtName);
+							//}
 						}
 						else
 						{
@@ -98,9 +109,7 @@ public class SelectListingsController implements Controller {
 	    resp.setData(params);
 		return resp;
 		
-		//bunch of comments to test git
-		//testing git again
-		
+			
 	}
 	
 	
