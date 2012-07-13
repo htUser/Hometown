@@ -10,15 +10,12 @@ public class KeyWordsBO {
 	String KeyWordName = new String();
 	String campaignKeyWordsJunctionId = new String();
 	String siteKeyWordsJunctionId = new String();
-	public String getSiteKeyWordsJunctionId() {
-		return siteKeyWordsJunctionId;
-	}
-
-	public void setSiteKeyWordsJunctionId(String siteKeyWordsJunctionId) {
-		this.siteKeyWordsJunctionId = siteKeyWordsJunctionId;
-	}
 	ArrayList<Counties> countiesAvailable = new ArrayList<Counties>();
 	
+	
+	public KeyWordsBO(){
+		super();
+	}
 	
 	public KeyWordsBO(String keyWordId, String keyWordName, String newCampaignKeyWordsJunctionId, String newSiteKeyWordsJunctionId) {
 		super();
@@ -27,6 +24,18 @@ public class KeyWordsBO {
 		this.campaignKeyWordsJunctionId = newCampaignKeyWordsJunctionId;
 		this.siteKeyWordsJunctionId = newSiteKeyWordsJunctionId;
 	}
+	
+	public String getSiteKeyWordsJunctionId() {
+		return siteKeyWordsJunctionId;
+	}
+
+	public void setSiteKeyWordsJunctionId(String siteKeyWordsJunctionId) {
+		this.siteKeyWordsJunctionId = siteKeyWordsJunctionId;
+	}
+	
+	
+	
+	
 	
 	public String getKeyWordId() {
 		return keyWordId;
