@@ -36,7 +36,7 @@ public class SelectBuildsController implements Controller {
 		Functions.debug("Reached before CampaignBo");
 		//Create the entire CampaignBO - fills the ClientLocation info, the Counties available info, not the places available, all the 
 		//current listings and all the pages available.
-		CampaignBO campaign = new CampaignBO(cId, false, true);
+		CampaignBO campaign = new CampaignBO(cId, false, true, null);
 		
 		Functions.debug("Reached before CampaignBo");
 		if(myAction.equals("create")==true){
@@ -46,9 +46,8 @@ public class SelectBuildsController implements Controller {
 			
 			
 		} else if(myAction.equals("save")==true){
+			
 			//for each page set selected if it is selected on the page
-			
-			
 			for(int i=0; i<campaign.getCurrentListings().size();i++){
 				
 				for(int j=0; j<campaign.getCurrentListings().get(i).getPagesAvailable().size();j++){
@@ -56,27 +55,15 @@ public class SelectBuildsController implements Controller {
 					//Bo defaults to selected true, so reset to false first, then check page and set
 					campaign.getCurrentListings().get(i).getPagesAvailable().get(j).setSelected(false);
 					
-					//Functions.debug("page value is "+(String)params.get(i+"page"+j));
-					
-					
-					
 					if(((String)params.get(i+"page"+j)!=null) &&((String)params.get(i+"page"+j)).length()!=0){
 						//Functions.debug("Inside the save if");
 						campaign.getCurrentListings().get(i).getPagesAvailable().get(j).setSelected(true);	
-						
-						
-						//Functions.debug("campaign to save campaignId "+campaign.getCampaignId());
-						Functions.debug("listing id is "+campaign.getCurrentListings().get(i).getListingId());
-							
+												
 						//save to db
 						Parameters newBuildParams = Functions.getParametersInstance();
 						newBuildParams.add("page", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId());
 						newBuildParams.add("campaign", campaign.getCampaignId());	
 						newBuildParams.add("csa_tracking", campaign.getCurrentListings().get(i).getListingId());	
-						
-						//Functions.debug("distance"+campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getDistance());
-						//Functions.debug("proximity"+campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getProximity());
-						
 						newBuildParams.add("distance", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getDistance());
 						newBuildParams.add("prox_rating", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getProximity());
 						
@@ -93,7 +80,10 @@ public class SelectBuildsController implements Controller {
 						    //Functions.throwError(msg + ".");                     // Ignore error
 						}
 						else
-						{
+						{	
+							String msg = "New build id is";
+						    Functions.debug(msg + result.getId());  
+						    
 							resp.setTargetPage("success.jsp");
 						}
 						

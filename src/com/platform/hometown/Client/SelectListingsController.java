@@ -29,7 +29,7 @@ public class SelectListingsController implements Controller {
 		
 		
 		ControllerResponse resp = new ControllerResponse();
-		CampaignBO campaign = new CampaignBO(cId, true, false);
+		CampaignBO campaign = new CampaignBO(cId, true, false, null);
 		
 		if(myAction.equals("create")==true){
 			

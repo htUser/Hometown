@@ -7,17 +7,17 @@ import com.platform.hometown.Client.*;
 
 
 public class CampaignBO {
-	
+	String debug_category = "CampaignBO";
 	
 	ClientLocation clientLocation;
 		
 	
-	String trackingNumber;
+	String trackingNumber;  //remove?
 	String serviceType;
 	String site;
 	String campaignName;
 	String campaignId;
-	String campaignIdInTable;
+	String campaignIdInTable; //remove?
 	
 	ArrayList<KeyWordsBO> keyWords = new ArrayList<KeyWordsBO>();		
 	ArrayList<ListingBO> currentListings = new ArrayList<ListingBO>();	// ArrayList of all the ListingBO objects currently in the db
@@ -25,19 +25,20 @@ public class CampaignBO {
 	/**
 	 * Campaign constructor. Completely constructs the BO from the db using the campaignId. 
 	 * Declares and calls the ClientLocation constructor which retrieves all the counties available to this 
-	 * location, but does not build all the places available.  Also completely fills the keyWords available.  Will 
+	 * location, but does not build all the places available.  Fills the keyWords available based on a boolean passed in.  Will 
 	 * fill the listings based on a boolean passed in. 
 	 * 
 	 * @param cId campaign id
 	 * @param buildListings True if you want to build the listings associated with this campaign.
 	 */
-	public CampaignBO(String cId, Boolean buildKeyWords, Boolean buildListings) throws Exception{
+	public CampaignBO(String cId, Boolean buildKeyWords, Boolean buildListings, String keyWordId) throws Exception{
 		campaignId = cId;
+		Functions.debug("in the CampaignBO");
 		
-        
+		
 		//get the campaign info based on campaign id
 		Result result = Functions.getRecord("Campaigns", "client2, t_number, location, service_type, site, campaign_name, campaign_id", campaignId);
-		//Functions.debug("after getRecord, code is "+result.getCode());
+		Functions.debug("after getRecord, code is "+result.getCode());
 		
 		if(result.getCode()>0){
 			Parameters dbCampaign = result.getParameters();
@@ -60,7 +61,7 @@ public class CampaignBO {
 		
 		//populate the listings if true
 		if(buildListings==true){
-			this.populateListingWithJoin(cId);
+			this.populateListingWithJoin(cId, keyWordId);
 		}
 		
 	}
@@ -133,11 +134,14 @@ public class CampaignBO {
 	}
 	
 	
-	private void populateListingWithJoin(String cId){
-		//try the sql join to get all the data needed
-		String latest_value;
+	private void populateListingWithJoin(String cId, String keyWordId){
+		//sql join to get all the listings available for builds 
+		
+		String sql;
 		try{
-			String sql = "SELECT kg.key_name AS kName, kg.id, sk.keyword, sk.id, ck.site_keyword, ck.id, c.county AS name, c.id, cc.id, cc.county, " +
+			
+			if((keyWordId==null)||(keyWordId.length()==0)){
+				sql = "SELECT kg.key_name AS kName, kg.id, sk.keyword, sk.id, ck.site_keyword, ck.id, c.county AS name, c.id, cc.id, cc.county, " +
 					"listing.tracking_number, listing.client2, listing.county_lookup, listing.campaign_keyword AS campaignKeyword, listing.id AS l, listing.location_county "+ 
 					"FROM CSA_Tracking AS listing  "+
 					"INNER JOIN Client_Counties AS cc ON cc.id = listing.location_county "+
@@ -146,6 +150,18 @@ public class CampaignBO {
 					"INNER JOIN Site_Keywords AS sk ON sk.id = ck.site_keyword "+
 					"INNER JOIN Keyword_Groups AS kg ON kg.id = sk.keyword "+
 					"WHERE listing.tracking_number= '" + cId + "' ORDER BY name ASC";
+			} else {
+				sql = "SELECT kg.key_name AS kName, kg.id, sk.keyword, sk.id, ck.site_keyword, ck.id, c.county AS name, c.id, cc.id, cc.county, " +
+						"listing.tracking_number, listing.client2, listing.county_lookup, listing.campaign_keyword AS campaignKeyword, listing.id AS l, listing.location_county "+ 
+						"FROM CSA_Tracking AS listing  "+
+						"INNER JOIN Client_Counties AS cc ON cc.id = listing.location_county "+
+						"INNER JOIN Counties AS c ON c.id = cc.county "+
+						"INNER JOIN Campaign_Keywords AS ck ON ck.id = listing.campaign_keyword "+
+						"INNER JOIN Site_Keywords AS sk ON sk.id = ck.site_keyword "+
+						"INNER JOIN Keyword_Groups AS kg ON kg.id = sk.keyword "+
+						"WHERE listing.tracking_number= '" + cId + "' " +
+						"AND listing.campaign_keyword = '" + keyWordId + "' ORDER BY name ASC";
+			}
 		      
 		    
        
@@ -157,27 +173,28 @@ public class CampaignBO {
 			      // Error occurred
 			      String msg = "Sample: Error during SQL search";
 			      Functions.debug("Sample:\n" + result.getMessage());
-			   }
+			   } else if (resultCode == 0){
+				   // No Records Found
+				   String msg = "No records found";
+				   Logger.info(msg + " Campaign id is "+cId+":\n" + result.getMessage(), debug_category); 
+				   Functions.throwError(msg + "."); 
+			   }	
 			   else if (resultCode > 0)
 			   {
 			      // A record was found. (Otherwise, resultCode == 0)                     
 			      ParametersIterator it = result.getIterator();
 			   
-			      int count = 0;
-			      while(it.hasNext()){
+			     while(it.hasNext()){
 			    	  Parameters params = it.next();        
-			    	 latest_value = params.get("campaignKeyword");
-			    	  //Functions.debug("Sample: campaignKeyword = " + latest_value);
-			    	  
-			    	  
+			    	
 			    	  ListingBO aListing = new ListingBO();
-				  aListing.setCampaignId(cId);
-				  aListing.setCampaignKeyWordId((String)params.get("campaignKeyword"));
-				  aListing.setLocationCountyId((String)params.get("location_county"));
-				  aListing.setCountyName((String)params.get("name"));
-				  aListing.setListingId((String)params.get("l"));	//id from the CSA_Tracking record
-				  aListing.setKeyWordName((String)params.get("kName")); 
-				  aListing.setClientId((String)params.get("client2"));
+			    	  aListing.setCampaignId(cId);
+			    	  aListing.setCampaignKeyWordId((String)params.get("campaignKeyword"));
+			    	  aListing.setLocationCountyId((String)params.get("location_county"));
+			    	  aListing.setCountyName((String)params.get("name"));
+			    	  aListing.setListingId((String)params.get("l"));	//id from the CSA_Tracking record
+			    	  aListing.setKeyWordName((String)params.get("kName")); 
+			    	  aListing.setClientId((String)params.get("client2"));
 				   
 					
 					  //get the pages available  for this Listing based on the location_county id
