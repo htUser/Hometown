@@ -56,9 +56,11 @@ public class SelectKeyWordsController implements Controller {
 				throw new Exception("Cannot retrieve keyWordId from the parameters");
 			}
 			
+			CampaignBO campaign = new CampaignBO(cId, false, true, keyWordId);
+			params.put("campaign", campaign);
 			params.put("keyword",keyWordId);
-			params.put("myValue", "fill");
-			resp.setTargetPage("buildsByKeyword.jsp");
+			params.put("action", "fill");
+			resp.setTargetPage("buildsByKeyWord.jsp");
 			
 		} else {
 			
