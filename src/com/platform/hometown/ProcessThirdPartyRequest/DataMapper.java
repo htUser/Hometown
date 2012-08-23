@@ -73,7 +73,7 @@ public class DataMapper
 		eleadMap.put("Field19","project_start");
 		eleadMap.put("Field21","description");
 		eleadMap.put("Field38","tracker");
-		eleadMap.put("Field37","client");
+		eleadMap.put("Field37","client2");
 		eleadMap.put("Field9","street_add");
 		eleadMap.put("DateCreated","datetime_text");
 		eleadMap.put("Field43","property_owner");
@@ -90,7 +90,7 @@ public class DataMapper
 	public Map<String,String> getPleadMap()
 	{
 		Map<String,String> pleadMap = new HashMap<String,String>();
-		pleadMap.put("acc","client");
+		pleadMap.put("acc","client2");
 		pleadMap.put("call","call_id");
 		pleadMap.put("call_end","call_end_text");
 		pleadMap.put("call_start","datetime_text");
@@ -152,18 +152,22 @@ public class DataMapper
 		String marchexAcct = "";
 		if(type.equals(E_LEAD_POST) || type.equals(P_LEAD_POST))
 		{			
-			String client = ljParams.get("client");
+			String client = ljParams.get("client2");
 			
 			marchexAcct = client;
-			//Functions.debug("Client " + client );
-			String clientId = getLookupFieldRecordId("ACCOUNT","number",client);
+			//Functions.debug("SSpClient " + client );
+			String clientId = getLookupFieldRecordId("e24e83b6385d495c84ffe4597bef47c1","number",client);
 			
 			if(clientId.equals(""))
+			{
+				ljParams.remove("client2");
 				ljParams.remove("client");
+			}
 			else
 			{
 				//Functions.debug("ClientId " + clientId );
-				ljParams.add("client",clientId);
+				ljParams.remove("client");
+				ljParams.add("client2",clientId);
 				ljParams.add("acct_id",clientId);
 			}
 			
@@ -279,19 +283,24 @@ public class DataMapper
 			
 			if(result.getCode() < 0)
 			{
+				//Functions.debug("SSp search Response= " +result.getCode());
 				throw new Exception(result.getMessage());
 			}
 			
 			if(result.getCode() == 0)
 			{
+				//Functions.debug("SSp search Response= " +result.getCode());
 				throw new Exception("Looked up record not found");
 			}
 			
 			ParametersIterator iterator = result.getIterator();
 	  		while(iterator.hasNext())
 			{
+			    //Functions.debug("SSp search Response= " +result.getCode());
 			    Parameters params = iterator.next();
 			    String record_id = params.get("record_id");
+			    //Functions.debug("SSp search Response params = " +params);
+			    //Functions.debug("SSp search Response record_id= " +params.get("record_id"));
 			    return record_id;
 			}
 		}
@@ -312,13 +321,15 @@ public class DataMapper
 			
 			if(ary.length == 11)
 			{
-				String phoneNo = "("+ary[1]+ary[2]+ary[3]+")"
+				//no longer split phone number up - keeping the general method as it validates phone number length
+				/*String phoneNo = "("+ary[1]+ary[2]+ary[3]+")"
 						+" "
 						+ary[4]+ary[5]+ary[6]
 						+"-"
 						+ary[7]+ary[8]+ary[9]+ary[10];
 						
-				return phoneNo;
+				return phoneNo;*/
+				return value;
 			}
 			else
 			{
