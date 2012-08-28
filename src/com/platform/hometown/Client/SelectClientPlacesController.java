@@ -10,235 +10,203 @@ import com.platform.api.*;
 import com.platform.hometown.proximity.*;
 
 public class SelectClientPlacesController implements Controller {
-	
-	
-
 	@Override
 	public ControllerResponse execute(HashMap params) throws Exception {
-		Functions.debug("In the execute method");
-		String myAction = (String)params.get("action");
-		//Functions.debug("The action is "+myAction);
+		String debug_category = "SelectClientPlacesController";
+		Logger.info("In selectClientPlacesController()", debug_category); 
 		
+		
+		String myAction = (String)params.get("action");
 		String locId;
+		ControllerResponse resp = new ControllerResponse();
+		
 		if(params.containsKey("myValue")){
 			locId = (String)params.get("myValue");
-			Functions.debug("locId is "+locId);
+			Logger.info("locId is "+locId, debug_category); 
+			
+			//Build BO
+			ClientLocation cl = new ClientLocation(locId,true);
+			
+			
+			if(myAction.equals("getCounties")==true){		
 				
-		} else {
-			throw new Exception("Cannot retrieve location_id from the parameters");
-		}
-		
-		
-		ControllerResponse resp = new ControllerResponse();
-		ClientLocation cl = new ClientLocation(locId,true);
-		
-		
-		//Functions.debug("after cl is built");
-		
-		if(myAction.equals("getCounties")==true){		
-			resp.setTargetPage("selectClientPlaces.jsp");
+				resp.setTargetPage("selectClientPlaces.jsp");
 			
-			
-			
-		} else if(myAction.equals("filterByCounty")==true){
-			
-			//remove later, never going to go thru this anymore
-			
-			String count = (String)params.get("numOfCounties");
-			String selectedValue;
-			
-			
-			for(int i=0; i<Integer.parseInt(count); i++){
+			} else if(myAction.equals("filterByMiles")==true){
+				String miles = (String)params.get("miles");
 				
-				try{
-					selectedValue = (String)params.get("selectedCounties");
-					
-				} catch (Exception e){
-					
-					String[] multiSelect = (String[])params.get("selectedCounties");
-					selectedValue = multiSelect[i];
-				}
-					
-				for(int j=0; j<cl.getCounties().size();j++){
-					String testCId = cl.getCounties().get(j).getCountyId();
-					//Functions.debug("value from object is "+testCId);
-					
-					if(testCId.equals(selectedValue)==true){
+				if((miles!=null)&&(((String)params.get("miles")).length()!=0)){
 							
-							cl.getCounties().get(j).setSelected(true);
-							//Functions.debug("getSelected is "+cl.getCounties().get(j).getSelected());
-							
-						}
-				}
-				
-			}
-			
-					
-			resp.setTargetPage("selectClientPlaces.jsp");
-			
-			
-		} else if(myAction.equals("filterByMiles")==true){
-			String miles = (String)params.get("miles");
-			
-			if((miles!=null)&&(((String)params.get("miles")).length()!=0)){
-						
-				try{
-										
-					cl.filterByMiles(miles);
-				} catch (Exception e){
-					//miles value is not parsable - redisplay the page with error
-					params.put("miles", "0");
-					params.put("errorMsg", "Please use a numeric value.");
+					try{
+											
+						cl.filterByMiles(miles);
+					} catch (Exception e){
+						//miles value is not parsable - redisplay the page with error
+						params.put("miles", "0");
+						params.put("errorMsg", "Please use a numeric value.");
+						cl = this.setSelectedFromPage(params, cl);
+					}
+				} else {
+					//no value in the miles, so just set the previously selected and return to page
 					cl = this.setSelectedFromPage(params, cl);
+					
 				}
-			} else {
-				//no value in the miles, so just set the previously selected and return to page
+				
+				resp.setTargetPage("selectClientPlaces.jsp");
+				
+				
+			} else if(myAction.equals("filterByLL")==true){
+				//find the county we are filtering on - all rest of data stays the same
+				//get LL filtering data off the page and then filer the places for that county
+				
 				cl = this.setSelectedFromPage(params, cl);
 				
-			}
+				
+				if(((String)params.get("llCounty")!=null)&&(((String)params.get("llCounty")).length()!=0)){	
+						
+					String llCount = (String)params.get("llCounty");
+				
+					//get Long/Lat from page, they both could be null
+					Boolean latDataHere = false;
+					Boolean longDataHere = false;
+					double latPage = 0;
+					double longPage = 0;
+					String latOperator = new String();
+					String longOperator = new String();
+					Boolean errorOnLatLong = false;
+				
+				
+					try{
+						if(((String)params.get("filterLat"+llCount)).length()!=0){
 			
-			resp.setTargetPage("selectClientPlaces.jsp");
-			
-			
-		} else if(myAction.equals("filterByLL")==true){
-			//find the county we are filtering on - all rest of data stays the same
-			//get LL filtering data off the page and then filer the places for that county
-			
-			cl = this.setSelectedFromPage(params, cl);
-			
-			//Functions.debug("In filterByLL");
-			//Functions.debug("llButton pushed is "+(String)params.get("llCounty"));
-			
-			if(((String)params.get("llCounty")!=null)&&(((String)params.get("llCounty")).length()!=0)){	
-					
-				String llCount = (String)params.get("llCounty");
-			
-				//get Long/Lat from page, they both could be null
-				Boolean latDataHere = false;
-				Boolean longDataHere = false;
-				double latPage = 0;
-				double longPage = 0;
-				String latOperator = new String();
-				String longOperator = new String();
-				Boolean errorOnLatLong = false;
-			
-			
-				try{
-					if(((String)params.get("filterLat"+llCount)).length()!=0){
-		
-						latDataHere = true;
-						latPage = Double.parseDouble((String)params.get("filterLat"+llCount));
-						latOperator = (String)params.get("latOperator"+llCount);
-						//Functions.debug("latDataHere"+latPage);
-					}
-				} catch (Exception e){
-					//lat/long value is not parsable - redisplay the page with error
-					params.put("filterLat"+llCount, "0");
-					params.put("LLerrorMsg", "Please use a numeric value.");
-					params.put("LLerrorCounty", llCount);
-					cl = this.setSelectedFromPage(params, cl);
-					errorOnLatLong = true;
-					
-				}
-			
+							latDataHere = true;
+							latPage = Double.parseDouble((String)params.get("filterLat"+llCount));
+							latOperator = (String)params.get("latOperator"+llCount);
 							
-				try{
-					if(((String)params.get("filterLong"+llCount)).length()!=0){
-		
-						longDataHere = true;
-						longPage = Double.parseDouble((String)params.get("filterLong"+llCount));
-						longOperator = (String)params.get("longOperator"+llCount);
-						//Functions.debug("longDataHere"+longPage);
-					}
-				} catch (Exception e){
-					//lat/long value is not parsable - redisplay the page with error
-					params.put("filterLong"+llCount, "0");
-					params.put("LLerrorMsg", "Please use a numeric value.");
-					params.put("LLerrorCounty", llCount);
-					cl = this.setSelectedFromPage(params, cl);
-					errorOnLatLong = true;
-					
-				}
-			
-				if(errorOnLatLong!=true){
-					//reset all the places to unselected first, then filter by LL to set selected
-					cl.getCounties().get(Integer.parseInt(llCount)).resetPlacesAvailable();			
-					cl.filterByLL(Integer.parseInt(llCount), latDataHere, latPage, longDataHere, longPage, latOperator, longOperator);
-				}
-			}
-				
-				
-				
-						
-			resp.setTargetPage("selectClientPlaces.jsp");
-			
-		
-		} else if(myAction.equals("save")==true){
-			
-			Functions.debug("In the save");
-			
-			
-			
-			int countAdds = 0;
-			//for each county, for each place, add a record if it is selected
-			for(int i=0; i<cl.getCounties().size();i++){
-				
-				
-				for(int j=0; j<cl.getCounties().get(i).getPlacesAvailable().size();j++){
-					
-					if(((String)params.get(i+"place"+j)!=null) &&((String)params.get(i+"place"+j)).length()!=0){
-							
-						double distance = processProximity.calculateDistance(cl.getCounties().get(i).getPlacesAvailable().get(j).getLongitude(), cl.getLocationLong(), cl.getCounties().get(i).getPlacesAvailable().get(j).getLat(), cl.getLocationLat());
-						int prox = processProximity.assignProximity(distance);
-						
-						//save to db
-						Functions.debug("place adding is "+cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceName());
-						
-						Parameters newClientPlaceParams = Functions.getParametersInstance();
-						newClientPlaceParams.add("location", cl.getLocationId());
-						newClientPlaceParams.add("client_county", cl.getCounties().get(i).getClientCountyId());
-						newClientPlaceParams.add("places", cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceId());
-						newClientPlaceParams.add("distance", distance);
-						newClientPlaceParams.add("proximity", prox);
-						
-						Result result = Functions.addRecord("Client_Places", newClientPlaceParams);
-						countAdds++;
-						int resultCode = result.getCode();
-						Functions.debug("Result code is "+resultCode);
-						
-						if(resultCode < 0)
-						{
-						    // Some error happened.
-						    String msg = "\n Place "+ cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceName() + " could not be added";
-						    Functions.debug(msg + ":\n" + result.getMessage());  // Log details
-						   // Functions.throwError(msg + ".");                   // Do not throw exception, catch 
-						    //adding a comment to test git
-						 
-						} else {
-							Functions.debug("Add a success. Record id "+result.getID());
-							Functions.debug("msg "+result.getMessage());
 						}
-										
+					} catch (Exception e){
+						//lat/long value is not parsable - redisplay the page with error
+						params.put("filterLat"+llCount, "0");
+						params.put("LLerrorMsg", "Please use a numeric value.");
+						params.put("LLerrorCounty", llCount);
+						cl = this.setSelectedFromPage(params, cl);
+						errorOnLatLong = true;
+						
 					}
 				
-				}
-			Functions.debug("Number of adds is "+countAdds);
+								
+					try{
+						if(((String)params.get("filterLong"+llCount)).length()!=0){
+			
+							longDataHere = true;
+							longPage = Double.parseDouble((String)params.get("filterLong"+llCount));
+							longOperator = (String)params.get("longOperator"+llCount);
+							
+						}
+					} catch (Exception e){
+						//lat/long value is not parsable - redisplay the page with error
+						params.put("filterLong"+llCount, "0");
+						params.put("LLerrorMsg", "Please use a numeric value.");
+						params.put("LLerrorCounty", llCount);
+						cl = this.setSelectedFromPage(params, cl);
+						errorOnLatLong = true;
+						
+					}
 				
-				resp.setTargetPage("success.jsp");
+					if(errorOnLatLong!=true){
+						//reset all the places to unselected first, then filter by LL to set selected
+						cl.getCounties().get(Integer.parseInt(llCount)).resetPlacesAvailable();			
+						cl.filterByLL(Integer.parseInt(llCount), latDataHere, latPage, longDataHere, longPage, latOperator, longOperator);
+					}
+				}
+					
+					
+					
+							
+				resp.setTargetPage("selectClientPlaces.jsp");
+				
+			
+			} else if(myAction.equals("save")==true){
+				Logger.info("In the save", debug_category); 
+				
+				
+				//for each county, for each place, add a record if it is selected
+				for(int i=0; i<cl.getCounties().size();i++){
+						
+					for(int j=0; j<cl.getCounties().get(i).getPlacesAvailable().size();j++){
+						
+						if(((String)params.get(i+"place"+j)!=null) &&((String)params.get(i+"place"+j)).length()!=0){
+							
+							
+							//first check if place is already in db
+							Result checkResult = Functions.searchRecords("Client_Places", "id","location equals '" + cl.getLocationId() + "' AND client_county equals '" + cl.getCounties().get(i).getClientCountyId() + "' AND places equals '" + cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceId() + "'");
+							if(checkResult.getCode()<0){
+								String msg = "Error searching for current client place.";
+								Logger.info(msg + ":\n" + checkResult.getMessage(), debug_category); 
+								Functions.throwError(msg);
+								resp.setTargetPage("error.jsp");
+		
+							}else if(checkResult.getCode()==0){
+								
+								
+								//only if no records found save to db
+								double distance = processProximity.calculateDistance(cl.getCounties().get(i).getPlacesAvailable().get(j).getLongitude(), cl.getLocationLong(), cl.getCounties().get(i).getPlacesAvailable().get(j).getLat(), cl.getLocationLat());
+								int prox = processProximity.assignProximity(distance);
+								
+								Parameters newClientPlaceParams = Functions.getParametersInstance();
+								newClientPlaceParams.add("location", cl.getLocationId());
+								newClientPlaceParams.add("client_county", cl.getCounties().get(i).getClientCountyId());
+								newClientPlaceParams.add("places", cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceId());
+								newClientPlaceParams.add("distance", distance);
+								newClientPlaceParams.add("proximity", prox);
+								
+								Result result = Functions.addRecord("Client_Places", newClientPlaceParams);
+								
+								int resultCode = result.getCode();
+								if(resultCode < 0)
+								{
+									// Some error happened.
+									String msg = "\n Place "+ cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceName() + " could not be added";
+								    Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
+									Functions.throwError(msg);
+								    resp.setTargetPage("error.jsp");
+																	
+								 
+								} else {
+									resp.setTargetPage("success.jsp");
+									Logger.info("Add a success. Record id "+result.getID(), debug_category); 
+				
+								}
+							}else {
+								Functions.debug("record already in the db " + cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceName());
+								resp.setTargetPage("success.jsp");	
+							}					
+						}
+					
+					}
+				
+					
+					resp.setTargetPage("success.jsp");
+				}
+				
+				
+				
+				
+				
+			} else {
+				//if none of my actions are called, then what error to throw?
 			}
 			
 			
-			
-			
-			
+			//always put the filled cl object back in the request and then return
+			params.put("clientLocation",cl);
+		    resp.setData(params);
 		} else {
-			//if none of my actions are called, then what error to throw?
+			resp.setTargetPage("error.jsp");
+			Functions.throwError("Cannot retrieve location_id from the parameters");
+			
 		}
-		
-		
-		//always put the filled cl object back in the request and then return
-		params.put("clientLocation",cl);
-	    resp.setData(params);
+			
 		return resp;
 	}
 	
@@ -251,19 +219,14 @@ public class SelectClientPlacesController implements Controller {
 		for(int i=0; i<cl.getCounties().size();i++){
 			
 			for(int j=0; j<cl.getCounties().get(i).getPlacesAvailable().size();j++){
-				//Functions.debug("placej "+(String)params.get("place"+j));
 				
 				if(((String)params.get(i+"place"+j)!=null) &&((String)params.get(i+"place"+j)).length()!=0){
 					cl.getCounties().get(i).getPlacesAvailable().get(j).setSelected(true);	
-					//Functions.debug("Place "+cl.getCounties().get(i).getPlacesAvailable().get(j).getPlaceName()+" is selected");
 					
 				}
 			
 			}
 		}
-		
-		
-		
 		
 		return cl;
 		
