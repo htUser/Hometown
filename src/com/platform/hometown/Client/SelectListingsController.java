@@ -33,7 +33,6 @@ public class SelectListingsController implements Controller {
 				resp.setTargetPage("listings.jsp");
 				
 			} else if(myAction.equals("save")==true){
-				Functions.debug("Saving Listings");
 				//for each keyword set selected if it is selected on the page
 				for(int i=0; i<campaign.getKeyWords().size();i++){
 					
@@ -46,12 +45,11 @@ public class SelectListingsController implements Controller {
 							Result checkResult = Functions.searchRecords("CSA_Tracking", "id","client2 equals '" + campaign.getClientLocation().getClient().getId() + "' AND county_lookup equals '" + campaign.getKeyWords().get(i).getCountiesAvailable().get(j).getCountyId() + "' AND tracking_number equals '" + campaign.getCampaignId() + "' AND campaign_keyword equals '" + campaign.getKeyWords().get(i).getCampaignKeyWordsJunctionId() + "' AND location_county equals '" +campaign.getKeyWords().get(i).getCountiesAvailable().get(j).getClientCountyId() + "'");
 							if(checkResult.getCode()<0){
 								String msg = "Error searching for current Listing.";
-								Functions.debug(msg + ":\n" + checkResult.getMessage());  	// Log details 
-							    Functions.throwError(msg);
+								Logger.info(msg + ":\n" + checkResult.getMessage(), debug_category); 
+								Functions.throwError(msg);
 								resp.setTargetPage("error.jsp");
 		
 							}else if(checkResult.getCode()==0){
-								Functions.debug("Adding listing to db");
 								
 								//only if no records found save to db
 								Parameters newListingParams = Functions.getParametersInstance();
@@ -71,8 +69,8 @@ public class SelectListingsController implements Controller {
 								{
 								    // Some error happened.
 								    String msg = "Listing could not be added";
-								    Functions.debug(msg + ":\n" + result.getMessage());  	// Log details 
-								    Functions.throwError(msg);
+								    Logger.info(msg + ":\n" + result.getMessage(), debug_category); 
+									Functions.throwError(msg);
 								    resp.setTargetPage("error.jsp");
 								    
 								   
@@ -108,6 +106,7 @@ public class SelectListingsController implements Controller {
 		    resp.setData(params);
 		
 		} else {
+			resp.setTargetPage("error.jsp");
 			Functions.throwError("Cannot retrieve campaign id from the parameters");
 			
 		}
