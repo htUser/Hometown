@@ -4,6 +4,100 @@ import com.platform.api.*;
 
 public class SendEmail {
 	
+	public void sendPropCommEmail(Parameters p) throws Exception{
+		String debug_category = "sendPropCommEmail";
+		String bodyTemplateID = new String();
+		Logger.info("In sendPropCommEmail", debug_category); 
+		
+		//get the info from the params 
+		String propCommId = p.get("id");
+		String subject = p.get("subject");
+		String propId = p.get("prop");
+		Logger.info("prop is "+ propId, debug_category);
+		String docId = p.get("document");
+		String cc = p.get("copy_to");
+		String emailType = p.get("email_type");
+		Logger.info("email type is "+emailType, debug_category);
+		
+		
+		if((propCommId!=null)&&(propCommId.length()!=0)){
+			String msg = "The comm id is" +propCommId; 
+			Logger.info(msg, debug_category); 
+				
+			//configure cc
+			if(cc.length()==0){
+				cc = "notify@hometown.net";
+			}else {
+				cc = cc + ",  notify@hometown.net";
+				
+			}
+			Logger.info(cc, debug_category);
+			
+			//choose template based on email type
+			if(emailType.equalsIgnoreCase("Template")){
+				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
+			}else if (emailType.equalsIgnoreCase("Full Lead")){
+				bodyTemplateID = "3cb956738df64afb8d38d8cee9840ae5";
+			} else if(emailType.equalsIgnoreCase("Partial Lead")){
+				//no template id yet - will change later
+				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
+			} else {
+				//default to base template - double check this!!
+				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
+			}
+			
+			//create email method call
+			String attachmentIdList = "";
+			String attachmentTemplateIdList = docId;
+			
+			String propEmail = getPropEmail(propId);
+			
+			Result sendEmailResult = Functions.sendEmailUsingTemplate("P_Comm", propCommId, propEmail, cc, subject, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
+			
+			if(sendEmailResult.getCode()<0){
+				//an error occurred
+				Logger.error("Error sending email: " +sendEmailResult.getMessage(), debug_category);
+				throw new Exception();
+			}
+			
+		} else {
+			Logger.error("No propCommId found.", debug_category);
+		}
+		
+	}
+	
+	
+String getPropEmail(String propId) throws Exception{
+	String debug_category = "sendPropCommEmail";	
+	String propEmail = new String();
+		
+		//search the table Props for the record
+		Result result = Functions.searchRecords("Prop", "id, email","id equals '" + propId + "'");
+		if(result.getCode()<0){
+			
+			 Functions.throwError("Error finding prop record."); 
+
+		}else if(result.getCode()==0){
+			//no records found 
+			Functions.throwError("Error no prop record found.");
+		}else {
+			//Success
+			
+			ParametersIterator iterator = result.getIterator();
+			while(iterator.hasNext())
+			  {
+			    Parameters params = iterator.next();
+			    propEmail = params.get("email");
+			    Logger.info(propEmail, debug_category);
+			 	
+			  }
+				
+			}
+		return propEmail;
+
+}
+	
+	
 	public void sendEmail(Parameters p) throws Exception{
 		String debug_category = "Comms/sendEmail";
 		Logger.info("In sendEmail", debug_category); 
@@ -26,7 +120,14 @@ public class SendEmail {
 			
 			
 			cc = generateCC(commId, cc);
-			//Logger.info(cc, debug_category);
+			
+			if(cc.length()==0){
+				cc = "support@hometown.net";
+			}else {
+				cc = cc + ", support@hometown.net";
+				
+			}
+			Logger.info(cc, debug_category);
 			
 			//create email method call
 			String attachmentIdList = "";
