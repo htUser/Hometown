@@ -1,0 +1,46 @@
+function populate() 
+{ 
+// Create a communications object. 
+var xmlhttp1; 
+if (window.XMLHttpRequest) { 
+// code for IE7+, Firefox, Chrome, Opera, Safari 
+xmlhttp1=new XMLHttpRequest(); 
+} 
+else { 
+// code for IE6, IE5 
+xmlhttp1=new ActiveXObject("Microsoft.XMLHTTP"); 
+} 
+
+// Configure the comms object with the function 
+// that runs when a response is received. 
+xmlhttp1.onreadystatechange=function() { 
+if (xmlhttp1.readyState==4 && xmlhttp1.status==200) { 
+
+
+// Success. Insert returned data into the page. 
+
+text = "<pre>" + xmlhttp1.responseText + "</pre>"; 
+var reply = eval('(' + xmlhttp1.responseText + ')'); 
+
+
+s = reply.platform.record.current_service2.content; 
+s1 = reply.platform.record.current_service2.displayValue; 
+
+c = reply.platform.record.current_stage; 
+
+
+document.mainForm.service_type.value=s; 
+document.mainForm.service_type_name.value=s1; 
+document.mainForm.activity.value=c; 
+} 
+} 
+
+// Set up the request and send it to the server 
+resource = "/networking/rest/record/Prop/"+document.mainForm.prop.value+"?alt=json"; 
+xmlhttp1.open("GET", resource, true); 
+xmlhttp1.send(); 
+
+
+} 
+
+
