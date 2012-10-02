@@ -49,7 +49,8 @@ public class SelectBuildsController implements Controller {
 							Logger.info("listing id is "+campaign.getCurrentListings().get(i).getListingId(), debug_category); 
 							
 							//first check if build is already in db
-							Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND campaign equals '" + campaign.getCampaignId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
+							//Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND campaign equals '" + campaign.getCampaignId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
+							Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
 							if(checkResult.getCode()<0){
 								String msg = "Error searching for current build.";
 								Logger.info(msg + ":\n" + checkResult.getMessage(), debug_category); 
@@ -61,7 +62,7 @@ public class SelectBuildsController implements Controller {
 								//only if no records found save to db
 								Parameters newBuildParams = Functions.getParametersInstance();
 								newBuildParams.add("page", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId());
-								newBuildParams.add("campaign", campaign.getCampaignId());	
+								//newBuildParams.add("campaign", campaign.getCampaignId());	
 								newBuildParams.add("csa_tracking", campaign.getCurrentListings().get(i).getListingId());	
 								newBuildParams.add("distance", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getDistance());
 								newBuildParams.add("prox_rating", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getProximity());
