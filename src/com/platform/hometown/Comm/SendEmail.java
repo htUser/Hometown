@@ -7,6 +7,8 @@ public class SendEmail {
 	public void sendPropCommEmail(Parameters p) throws Exception{
 		String debug_category = "sendPropCommEmail";
 		String bodyTemplateID = new String();
+		String serviceName = new String();
+		String cc = new String();
 		Logger.info("In sendPropCommEmail", debug_category); 
 		
 		//get the info from the params 
@@ -15,9 +17,21 @@ public class SendEmail {
 		String propId = p.get("prop");
 		Logger.info("prop is "+ propId, debug_category);
 		String docId = p.get("document");
-		String cc = p.get("copy_to");
+		cc = p.get("copy_to");
 		String emailType = p.get("email_type");
 		Logger.info("email type is "+emailType, debug_category);
+		String serviceTypeId = p.get("service_type");
+		Logger.info("service type is "+serviceTypeId, debug_category);
+		
+		
+		if(emailType==null){
+			Functions.throwError("Error : no email type selected.");
+		}
+		
+		if(serviceTypeId==null){
+			Functions.throwError("Error :  no service type selected.");
+		}
+		
 		
 		
 		if((propCommId!=null)&&(propCommId.length()!=0)){
@@ -25,22 +39,33 @@ public class SendEmail {
 			Logger.info(msg, debug_category); 
 				
 			//configure cc
-			if(cc.length()==0){
+			if((cc!=null)&&(cc.length()==0)){
+				
+				cc = "notify@hometown.net";
+			}else if(cc==null){
+				
 				cc = "notify@hometown.net";
 			}else {
+				
 				cc = cc + ",  notify@hometown.net";
 				
 			}
 			Logger.info(cc, debug_category);
 			
-			//choose template based on email type
+			//choose template & subject based on email type
 			if(emailType.equalsIgnoreCase("Template")){
 				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
 			}else if (emailType.equalsIgnoreCase("Full Lead")){
-				bodyTemplateID = "3cb956738df64afb8d38d8cee9840ae5";
+				bodyTemplateID = "bcc6de3c929f4aa6b9b6a40068d19164";
+				serviceName = lookupServiceName(serviceTypeId);
+				
+				subject = "Hometown " + serviceName +  " Estimate Request";
+				
 			} else if(emailType.equalsIgnoreCase("Partial Lead")){
-				//no template id yet - will change later
-				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
+				bodyTemplateID = "8b5ec6e697ff47518c300a87167b8581";
+				serviceName = lookupServiceName(serviceTypeId);
+				subject = serviceName +  " Estimate Request";
+				
 			} else {
 				//default to base template - double check this!!
 				bodyTemplateID = "462893e417f1438f97542b7016b4b24a";
@@ -63,12 +88,45 @@ public class SendEmail {
 		} else {
 			Logger.error("No propCommId found.", debug_category);
 		}
+
 		
 	}
 	
+
+String lookupServiceName(String serviceTypeId) throws Exception{
+	
+	String debug_category = "lookupServiceName";	
+	String serviceTypeName = new String();
+		
+		//search the table Service Type for the record
+		Result result = Functions.searchRecords("Service_Type", "id, type","id equals '" + serviceTypeId + "'");
+		if(result.getCode()<0){
+			
+			 Functions.throwError("Error finding service type record."); 
+
+		}else if(result.getCode()==0){
+			//no records found 
+			Functions.throwError("Error no service type record found.");
+		}else {
+			//Success
+			
+			ParametersIterator iterator = result.getIterator();
+			while(iterator.hasNext())
+			  {
+			    Parameters params = iterator.next();
+			    serviceTypeName = params.get("type");
+			    Logger.info(serviceTypeName, debug_category);
+			 	
+			  }
+				
+			}
+		return serviceTypeName;
+	
+}
+	
 	
 String getPropEmail(String propId) throws Exception{
-	String debug_category = "sendPropCommEmail";	
+	String debug_category = "getPropEmail";	
 	String propEmail = new String();
 		
 		//search the table Props for the record

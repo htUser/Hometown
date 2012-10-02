@@ -62,7 +62,8 @@ public class SelectBuildByKeyWordController implements Controller {
 					if(((String)params.get(i+"page"+j)!=null) &&((String)params.get(i+"page"+j)).length()!=0){
 							
 						//first check if build is already in db
-						Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND campaign equals '" + campaign.getCampaignId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
+						//Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND campaign equals '" + campaign.getCampaignId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
+						Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
 						if(checkResult.getCode()<0){
 							String msg = "Error searching for current build.";
 							Logger.info(msg + ":\n" + checkResult.getMessage(), debug_category); 
@@ -74,7 +75,7 @@ public class SelectBuildByKeyWordController implements Controller {
 							//only if no records found save to db
 							Parameters newBuildParams = Functions.getParametersInstance();
 							newBuildParams.add("page", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId());
-							newBuildParams.add("campaign", campaign.getCampaignId());	
+							//newBuildParams.add("campaign", campaign.getCampaignId());	
 							newBuildParams.add("csa_tracking", campaign.getCurrentListings().get(i).getListingId());	
 							newBuildParams.add("distance", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getDistance());
 							newBuildParams.add("prox_rating", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getProximity());
@@ -123,5 +124,3 @@ public class SelectBuildByKeyWordController implements Controller {
 	
 	
 	}
-
-
