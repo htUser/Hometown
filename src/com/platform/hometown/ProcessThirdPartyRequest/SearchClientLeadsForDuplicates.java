@@ -27,7 +27,7 @@ public class SearchClientLeadsForDuplicates
 			
 			String _30DaysDateTimeStr = sdf.format(_30DaysAgoDate);
 			
-			String client = (String)requestParams.get("client");
+			String client = (String)requestParams.get("client2");
 			
 			/*
 			Functions.debug("Phone = " + phone + " date_time1 = "
@@ -68,7 +68,7 @@ public class SearchClientLeadsForDuplicates
 			String filter = "(phone equals '" + phone + "' or caller_id_phone equals '" + phone +"')"  
 			                            + " AND date_time >= '" + _30DaysDateTimeStr + "'"
 			                            + " AND date_time < '" + dateTimeStr +"'"
-			                            + " AND client equals '" + client +"'"
+			                            + " AND client2 equals '" + client +"'"
 			                            + " AND (duration > 30 or duration equals 'BLANK')"
 			                            + " AND validate equals 'VALID LEAD'";
 			
