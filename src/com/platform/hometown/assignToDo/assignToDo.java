@@ -10,8 +10,8 @@ public class assignToDo {
 		String owner = p.get("owner_id");
 		Boolean sendEmail = p.getBoolean("send_email");
 		
-		//Functions.debug("AssignedTo is "+assignedTo+", owner is "+owner);
-		//Functions.debug("Send email is "+sendEmail);
+		Functions.debug("AssignedTo is "+assignedTo+", owner is "+owner);
+		Functions.debug("Send email is "+sendEmail);
 		
 		
 		if(assignedTo!=null){
