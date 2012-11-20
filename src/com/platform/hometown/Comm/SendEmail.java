@@ -246,7 +246,7 @@ String getPropEmail(String propId) throws Exception{
 			    //Logger.info(contactId, debug_category);
 			    
 			    //now search for that contact and get the email address
-			    String sql = "SELECT id, email FROM Contacts where id = '"+ contactId +"'";
+			    String sql = "SELECT id, email FROM Contacts_HT where id = '"+ contactId +"'";
 			    Result contactResult = Functions.execSQL(sql);
 			    //Result contactResult = Functions.getRecord("Contacts", "id, email","id equals '" + contactId + "'");
 			    if(contactResult.getCode()<0){
