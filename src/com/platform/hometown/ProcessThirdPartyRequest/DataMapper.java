@@ -14,6 +14,7 @@ public class DataMapper
 	public static String E_LEAD_POST = "elead-post";
 	public static String P_LEAD_POST = "plead-post";
 	public static String E_PROSPECT_POST = "eprospect-post";
+	public static String REVIEW_POST = "review-post";
 	
 	private String type;
 	private Map<String,String[]> dataMap;
@@ -129,6 +130,26 @@ public class DataMapper
 		return prospectContactMap;
 	}
 	
+	public Map<String,String> getReviewMap()
+	{
+		Map<String,String> reviewMap = new HashMap<String,String>();
+		reviewMap.put("Field218","rating");
+		reviewMap.put("Field3","completed");
+		reviewMap.put("Field318","service_date");
+		reviewMap.put("Field106","service_specs");
+		reviewMap.put("Field319","cost");
+		reviewMap.put("Field108","story");
+		reviewMap.put("Field114","first_name");
+		reviewMap.put("Field115","last_name");
+		reviewMap.put("Field329","street");
+		reviewMap.put("Field116","phone");
+		reviewMap.put("Field327","email");
+		reviewMap.put("Field325","client2");
+		reviewMap.put("Field330","city_st");
+				
+		return reviewMap;
+	}
+	
 
 	Map<String,String> getFieldsMap(String type) throws Exception
 	{
@@ -138,6 +159,8 @@ public class DataMapper
 			return getPleadMap();
 		else if(type.equals(E_PROSPECT_POST))
 			return getProspectContactMap();
+		else if(type.equals(REVIEW_POST))
+			return getReviewMap();
 		else
 		{
 			Functions.debug("Invalid form type");
@@ -228,6 +251,42 @@ public class DataMapper
 			ljParams.add("zip_code_1157081194",processZipCode(ljParams.get("zip"),ljParams.get("city")));
 			ljParams.add("email",ljParams.get("email_1157081194"));
 			//ljParams.remove("zip");
+		}
+		
+		if(type.equals(REVIEW_POST))
+		{
+			//Change service date to LJ date format
+			String date_time = ljParams.get("service_date");
+			//Functions.debug("service_date before" + date_time );			
+			String dateTimeDate = processDateFieldNoTime(date_time);
+			//Functions.debug("service_date after= " + dateTimeDate );
+			ljParams.add("service_date",dateTimeDate);
+			
+			//map Rating to LJ 1-5 numeric value
+			String rating = ljParams.get("rating");
+			if(rating.equalsIgnoreCase("Very Poor"))
+			{
+				rating = "1";
+			} else if(rating.equalsIgnoreCase("Poor"))
+			{
+				rating = "2";
+			} else if(rating.equalsIgnoreCase("OK"))
+			{
+				rating="3";
+			} else if(rating.equalsIgnoreCase("Good"))
+			{
+				rating="4";
+			}else if(rating.equalsIgnoreCase("Very Good"))
+			{
+				rating = "5";
+			} else
+			{
+				//default to 3 if rating not found
+				rating="3";
+			}
+			
+			ljParams.add("rating", rating);
+				
 		}
 		
 		return ljParams;
@@ -368,6 +427,38 @@ public class DataMapper
 	    		return "";
 	    		
 	    	}
+	    	return "";
+	}
+	
+	public String processDateFieldNoTime(String dateStr) 
+	{
+		try
+		{
+			if(dateStr != null && !dateStr.equals(""))
+			{
+				
+				String DATE_FORMAT = "yyyyMMdd";
+	    		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+	    		sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+	    		//Functions.debug("date_str = " +dateStr);
+	    		
+	    		Date newDate = (Date)sdf.parse(dateStr.trim());
+	    		DATE_FORMAT = "MM/dd/yyyy";
+	    		sdf = new SimpleDateFormat(DATE_FORMAT);
+	    		sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+	    		dateStr = sdf.format(newDate);
+	    		//Functions.debug("newDate = "+newDate);
+	    		//Functions.debug("dateStr = " + dateStr);
+	    		return dateStr ;
+	    	}
+	    		
+	    }
+	    catch(Exception e)
+	    {
+	    	Functions.debug(e);
+	    	return "";
+	    		
+	    }
 	    	return "";
 	}
 	

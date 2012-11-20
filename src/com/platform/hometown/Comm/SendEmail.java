@@ -19,9 +19,9 @@ public class SendEmail {
 		String docId = p.get("document");
 		cc = p.get("copy_to");
 		String emailType = p.get("email_type");
-		Logger.info("email type is "+emailType, debug_category);
+		//Logger.info("email type is "+emailType, debug_category);
 		String serviceTypeId = p.get("service_type");
-		Logger.info("service type is "+serviceTypeId, debug_category);
+		//Logger.info("service type is "+serviceTypeId, debug_category);
 		
 		
 		if(emailType==null){
@@ -50,7 +50,7 @@ public class SendEmail {
 				cc = cc + ",  notify@hometown.net";
 				
 			}
-			Logger.info(cc, debug_category);
+			//Logger.info(cc, debug_category);
 			
 			//choose template & subject based on email type
 			if(emailType.equalsIgnoreCase("Template")){
@@ -115,7 +115,7 @@ String lookupServiceName(String serviceTypeId) throws Exception{
 			  {
 			    Parameters params = iterator.next();
 			    serviceTypeName = params.get("type");
-			    Logger.info(serviceTypeName, debug_category);
+			    //Logger.info(serviceTypeName, debug_category);
 			 	
 			  }
 				
@@ -146,7 +146,7 @@ String getPropEmail(String propId) throws Exception{
 			  {
 			    Parameters params = iterator.next();
 			    propEmail = params.get("email");
-			    Logger.info(propEmail, debug_category);
+			    //Logger.info(propEmail, debug_category);
 			 	
 			  }
 				
@@ -171,7 +171,7 @@ String getPropEmail(String propId) throws Exception{
 		
 		if((commId!=null)&&(commId.length()!=0)){
 			String msg = "The comm id is" +commId; 
-			Logger.info(msg, debug_category); 
+			//Logger.info(msg, debug_category); 
 			//Logger.info(subject, debug_category);
 			//Logger.info(contactEmail, debug_category);
 			//Logger.info(body, debug_category);
@@ -185,23 +185,38 @@ String getPropEmail(String propId) throws Exception{
 				cc = cc + ", support@hometown.net";
 				
 			}
-			Logger.info(cc, debug_category);
+			//Logger.info(cc, debug_category);
 			
 			//create email method call
 			String attachmentIdList = "";
+			
+			
 			String attachmentTemplateIdList = docId;
+			
+			
 			String bodyTemplateID = "6526b0cfbe9843cb90a3934dbdb9f662";
-	
 			
-			Result sendEmailResult = Functions.sendEmailUsingTemplate("Comms", commId, contactEmail, cc, subject, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
 			
-			if(sendEmailResult.getCode()<0){
-				//an error occurred
-				Logger.error("Error sending email: " +sendEmailResult.getMessage(), debug_category);
+			try{
+				
+				Result sendEmailResult = Functions.sendEmailUsingTemplate("Comms", commId, contactEmail, cc, subject, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
+			
+				
+				if(sendEmailResult.getCode()<0){
+					//an error occurred
+					Logger.error("Error sending email: " +sendEmailResult.getMessage(), debug_category);
+					throw new Exception();
+				}
+			
+			}catch(Exception e){
+				Logger.info("caught the exception", debug_category);
 				throw new Exception();
+				
 			}
 			
+			
 		} else {
+			Logger.info("No commId found.", debug_category);
 			Logger.error("No commId found.", debug_category);
 		}
 			
@@ -267,4 +282,3 @@ String getPropEmail(String propId) throws Exception{
 
 }
 }
-

@@ -20,6 +20,8 @@ public class ThirdPartyRequestProcessor
 	//Constructor
 	public ThirdPartyRequestProcessor(String formType, Map<String,String[]> requestData) throws Exception
 	{
+		
+		
 		this.formType = formType;
 		this.requestData = requestData;
 		if(formType == null || formType.trim().equals(""))
@@ -85,6 +87,23 @@ public class ThirdPartyRequestProcessor
 					}
 					
 				}
+				else if(formType.equals(DataMapper.REVIEW_POST))
+				{
+					//Logger.info("In the processRequest() for Review-post", "NewThirdPartyRequestProcessor");
+					String objectId = getObjectId(this.formType);
+					
+					DataMapper dm = new DataMapper(this.formType, requestData);
+					Parameters ljParams = dm.prepareLJParams();
+					ljParams.add("formType",formType);
+					
+					Result result = addRecordToLJ(objectId, ljParams);
+					if(result.getCode() < 0)
+					{
+						throw new Exception("Unable to add Record");
+					}
+				
+				}
+				
 				
 			}
 		}
@@ -118,6 +137,10 @@ public class ThirdPartyRequestProcessor
 		if(formType.equals(DataMapper.E_LEAD_POST) || formType.equals(DataMapper.P_LEAD_POST))
 		{
 			return "Client_Leads";	
+		
+		} else if (formType.equals(DataMapper.REVIEW_POST))
+		{
+			return "Project_Costs";
 		}
 		else
 		{
