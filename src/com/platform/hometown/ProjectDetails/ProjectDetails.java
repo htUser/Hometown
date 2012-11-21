@@ -15,6 +15,7 @@ public class ProjectDetails {
 		String bodyTemplateID = new String();
 		String attachmentTemplateIdList = "";
 		String attachmentIdList = "";
+		String subject = "HometownRep: You Have a New Review";
 		Client c;
 				
 		String pdId = p.get("id");
@@ -22,6 +23,7 @@ public class ProjectDetails {
 		
 		if((pdId!=null)&&(pdId.length()!=0)){
 			String msg = "The pd id is" +pdId; 
+			Logger.debug(msg, debug_category);
 		
 			//check for null client id
 			if((clientId!=null)&&(clientId.length()!=0)){
@@ -31,11 +33,11 @@ public class ProjectDetails {
 				c = lookupClientInfo(clientId);
 			
 			
-				bodyTemplateID = "7b92889b3f6443849b4de82d4bfc30e0";
+				bodyTemplateID = "5b96fc7c7fec4b01b1f5eb5efd891715";
 			
 			
 				//send email
-				Result sendEmailResult = Functions.sendEmailUsingTemplate("Project_cost", pdId, c.getEmail(), c.getCcReviewsContact(), null, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
+				Result sendEmailResult = Functions.sendEmailUsingTemplate("Project_Costs", pdId, c.getEmail(), c.getCcReviewsContact(), subject, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
 				
 				
 				if(sendEmailResult.getCode()<0){
@@ -65,13 +67,32 @@ public class ProjectDetails {
 		
 
 		Result result = Functions.getRecord("Clients", "email, cc_reviews_contact", clientId);
-		Functions.debug("after getRecord, code is "+result.getCode());
+		//Functions.debug("after getRecord, code is "+result.getCode());
 		
 		if(result.getCode()>0){
 			Parameters p = result.getParameters();
-			
-			c.setCcReviewsContact((String)p.get("cc_reviews_contact"));
 			c.setEmail((String)p.get("email"));
+			//Functions.debug("email "+c.getEmail());
+			
+			//lookup the cc contact's email
+			String ccId = (String)p.get("cc_reviews_contact");
+			//Functions.debug("ccReviews to contact id "+ccId);
+			
+			Result ccResult = Functions.getRecord("Contacts_HT", "email", ccId);
+			//Functions.debug("after getRecord, code is "+ccResult.getCode());
+			
+			if(ccResult.getCode()>0){
+				Parameters ccP = ccResult.getParameters();
+				c.setCcReviewsContact((String)ccP.get("email"));
+			} else {
+				Logger.info("No contact record found for cc: contact id " + ccId, debug_category);
+				Logger.error("No contact record found for cc: contact id " + ccId, debug_category);
+				throw new Exception();
+				
+			}
+				
+			
+			
 		} else {
 			Logger.info("No client record found: client id " + clientId, debug_category);
 			Logger.error("No client record found: client id " + clientId, debug_category);

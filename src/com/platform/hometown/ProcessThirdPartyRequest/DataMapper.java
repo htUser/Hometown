@@ -15,6 +15,7 @@ public class DataMapper
 	public static String P_LEAD_POST = "plead-post";
 	public static String E_PROSPECT_POST = "eprospect-post";
 	public static String REVIEW_POST = "review-post";
+	public static String REVIEW_RESPONSE = "review-response-post";
 	
 	private String type;
 	private Map<String,String[]> dataMap;
@@ -33,6 +34,7 @@ public class DataMapper
 	
 	public Parameters prepareLJParams() throws Exception
 	{
+		
 		Parameters ljParams = Functions.getParametersInstance();
 
 		Map<String,String> thirdPartyToLjMap = getFieldsMap(this.type);
@@ -150,9 +152,27 @@ public class DataMapper
 		return reviewMap;
 	}
 	
+	
+	
+	public Map<String,String> getClientResponseMap()
+	{
+		//Functions.debug("in getClientResponseMap()");
+		
+		Map<String,String> reviewMap = new HashMap<String,String>();
+		reviewMap.put("Field225","id");
+		reviewMap.put("Field105","response");
+		reviewMap.put("Field107","responder_fname");
+		reviewMap.put("Field108","responder_lname");
+		
+				
+		return reviewMap;
+	}
+	
 
 	Map<String,String> getFieldsMap(String type) throws Exception
 	{
+		
+		
 		if(type.equals(E_LEAD_POST))
 			return getEleadMap();
 		else if(type.equals(P_LEAD_POST))
@@ -161,6 +181,8 @@ public class DataMapper
 			return getProspectContactMap();
 		else if(type.equals(REVIEW_POST))
 			return getReviewMap();
+		else if(type.equals(REVIEW_RESPONSE))
+			return getClientResponseMap();
 		else
 		{
 			Functions.debug("Invalid form type");
@@ -286,6 +308,15 @@ public class DataMapper
 			}
 			
 			ljParams.add("rating", rating);
+				
+		}if(type.equals(REVIEW_RESPONSE))
+		{
+
+    		SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+    		Date date = new Date();
+    		//Functions.debug("resp_rec_date= " +dateFormat.format(date));
+    		
+    		ljParams.add("resp_rec_date",dateFormat.format(date));
 				
 		}
 		

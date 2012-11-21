@@ -28,11 +28,15 @@ public class ThirdPartyRequestProcessor
 		{
 			throw new Exception("Invalid form type");
 		}
+		
+		Functions.debug("Form type is: "+formType);
 	}
 	
 	//Main processor method
 	public void processRequest()
 	{
+		
+		
 		try
 		{
 			if(formType != null)
@@ -51,11 +55,24 @@ public class ThirdPartyRequestProcessor
 					//	Functions.debug(ljParams);
 					//}
 					
-					Result result = addRecordToLJ(objectId, ljParams);
-					if(result.getCode() < 0)
-					{
-						throw new Exception("Unable to add Record");
-					}
+					if(formType.equals(DataMapper.E_LEAD_POST)){
+							Result result = addRecordToLJ(objectId, ljParams);
+							
+							if(result.getCode() < 0)
+							{
+								Functions.debug("Unable to add Record"+"\n"+requestData);
+								sendErrorEmail("E Lead Post");
+							}
+					} else if (formType.equals(DataMapper.P_LEAD_POST)){
+						Result result = addRecordToLJ(objectId, ljParams);
+						
+						if(result.getCode() < 0)
+						{
+							Functions.debug("Unable to add Record"+"\n"+requestData);
+							sendErrorEmail("P Lead Post");
+						}
+				}
+					
 				}
 				else if(formType.equals(DataMapper.E_PROSPECT_POST ))
 				{
@@ -82,8 +99,9 @@ public class ThirdPartyRequestProcessor
 					}
 					
 					if(result !=null && result.getCode()< 0)
-					{
-						throw new Exception("Unable to process Prospect");
+                    {
+						Functions.debug("Quality Rating Debug = " + ljParams.toString());
+                      	throw new Exception("Unable to process Prospect");
 					}
 					
 				}
@@ -96,21 +114,46 @@ public class ThirdPartyRequestProcessor
 					Parameters ljParams = dm.prepareLJParams();
 					ljParams.add("formType",formType);
 					
+					//update record in LJ, not add a new record
+					
+					
 					Result result = addRecordToLJ(objectId, ljParams);
 					if(result.getCode() < 0)
 					{
-						throw new Exception("Unable to add Record");
+						//throw new Exception("Unable to add Record");
+						Functions.debug("Unable to add Record"+"\n"+requestData);
+						sendErrorEmail("Client Review Post");
+						
 					}
+				
+				} else if(formType.equals(DataMapper.REVIEW_RESPONSE))
+				{
+					Logger.info("In the processRequest() for Client-Review-Response", "NewThirdPartyRequestProcessor");
+					Functions.debug("In the else of processRequest()");
+					String objectId = getObjectId(this.formType);
+					
+					DataMapper dm = new DataMapper(this.formType, requestData);
+					Parameters ljParams = dm.prepareLJParams();
+					ljParams.add("formType",formType);
+					
+					Result result = updateRecordToLJ(objectId, ljParams);
+					if(result.getCode() < 0)
+					{
+						Functions.debug("Unable to update Record"+"\n"+requestData);
+						sendErrorEmail("Client Review Response");
+						
+					}
+					
 				
 				}
 				
-				
-			}
-		}
-		catch(Exception e)
-		{
-			Functions.debug(e+"\n"+requestData);
-			try
+			}	
+			
+		}catch(Exception e)
+			{
+				Functions.debug(e+"\n"+requestData);
+			} 
+			/*try
 			{
 				Result sendEmailResult = Functions.sendEmail("b4a004b7feba4f60b51428aa64703d61", "", "maustin@hometown.net,kpratt@hometown.net", 
     										"", "Error Processing Client Lead - Class: ThirdPartyRequestProcessor", 
@@ -120,14 +163,48 @@ public class ThirdPartyRequestProcessor
     			catch(Exception sendEmailException)
     			{
     				Functions.debug("Error in sending email \n" + sendEmailException);
-    			}
+    			}*/
+	}
+	
+	
+	public void sendErrorEmail(String formType){
+		
+		Functions.debug("\n"+requestData);
+	
+		try
+		{
+			Result sendEmailResult = Functions.sendEmail("b4a004b7feba4f60b51428aa64703d61", "", "maustin@hometown.net,kpratt@hometown.net", 
+									"", "Error Processing "+formType, 
+									"\n\n"+"Have a nice day.",
+									"", "");
 		}
+		catch(Exception sendEmailException)
+		{
+			Functions.debug("Error in sending email \n" + sendEmailException);
+		}
+		
 	}
 	
 	//Wrapper over LJ addRecord
 	public Result addRecordToLJ(String objectId, Parameters p) throws Exception
 	{
 		Result result = Functions.addRecord(objectId, p);
+        
+		return result;
+	}
+	
+	//Wrapper over LJ updateRecord
+	public Result updateRecordToLJ(String objectId, Parameters p) throws Exception
+	{
+		//turn off any data policies that would fire on an update
+		p.add(PLATFORM.PARAMS.RECORD.DO_NOT_EXEC_DATA_POLICY,"1");
+		String recordID = p.get("id");
+		
+		//Functions.debug("object id is "+ recordID);
+		//p.remove("id");
+		
+		Result result = Functions.updateRecord(objectId, recordID, p);
+        
 		return result;
 	}
 	
@@ -138,7 +215,7 @@ public class ThirdPartyRequestProcessor
 		{
 			return "Client_Leads";	
 		
-		} else if (formType.equals(DataMapper.REVIEW_POST))
+		} else if (formType.equals(DataMapper.REVIEW_POST) || formType.equals(DataMapper.REVIEW_RESPONSE))
 		{
 			return "Project_Costs";
 		}
