@@ -12,11 +12,13 @@ public class ClientServices {
 		String csId = p.get("id");
 		String clientId = p.get("client2");
 		String serviceType = p.get("service_type");
-		String status = p.get("campaign_status");
+		//String status = p.get("campaign_status");
+		String status2 = p.get("client_status");
 		
 		Functions.debug("service type "+serviceType);
-		Functions.debug("status "+status);
+		Functions.debug("new status "+status2);
 		
+		if((status2!=null)&&(status2.length()!=0)){
 		
 		if((csId!=null)&&(csId.length()!=0)){
 			String msg = "The cs id is" +csId; 
@@ -63,7 +65,7 @@ public class ClientServices {
 					Functions.debug("inOppServices is "+inOppServices);
 					
 					//Needs to be in current services
-					if(status.equals("Yes")){
+					if((!status2.equals("None"))&&(!status2.equals("Former"))){
 						if (!inCurrentServices){
 							//add to current services
 							if(cServices.length()==0)
@@ -134,7 +136,9 @@ public class ClientServices {
 					updateParams.add(PLATFORM.PARAMS.RECORD.ENABLE_MULTIPART,"1");
 									
 					Result updateResult = Functions.updateRecord("Clients", clientId, updateParams);  
-				
+					Functions.debug("Error Code is "+updateResult.getCode());
+					Functions.debug("Error message is "+updateResult.getMessage());
+					
 					if(updateResult.getCode()<0){
 						String msg1 = "There was an error updating the client record with the new/changes client services record. Client Services Id is "+ csId;
 						Logger.info(msg1 + ":\n" + result.getMessage(), debug_category); 
@@ -157,6 +161,7 @@ public class ClientServices {
 		
 		}		
 	
+	}
 	}
 		
 }
