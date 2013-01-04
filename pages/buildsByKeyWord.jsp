@@ -9,7 +9,8 @@
 	CampaignBO c= (CampaignBO)params.get("campaign");
 	String myAction = (String)params.get("action");
 	String keyWord = (String)params.get("keyword");
-	ArrayList<ListingBO> listings = c.getCurrentListings();
+	ArrayList<Counties> counties = c.getClientLocation().getCounties();
+	KeyWordsBO theKeyWordBO = c.getSelectedKeyWord();
 	
 	
 		
@@ -113,13 +114,14 @@ function checkAll(me, boxesToCheck )
 				<% 
 				int countListings=0;
 				int countPages=0;
-				for(int k=0; k < listings.size(); k++ )
+				
+				for(int k=0; k < counties.size(); k++ )
 				{
-					ListingBO listing  = (ListingBO)listings.get(k); 
+					Counties aCounty  = (Counties)counties.get(k); 
 					countListings++;
 					
 					%>
-					<th class="header1"><%=listing.getCountyName() %> <br> <%=listing.getKeyWordName() %> </th>
+					<th class="header1"><%=aCounty.getCountyName() %> <br> <%=theKeyWordBO.getKeyWordName() %> </th>
 					
 					
 					
@@ -135,21 +137,21 @@ function checkAll(me, boxesToCheck )
 							
 							
 					<tr>
-					<% for(int k=0; k < listings.size(); k++ ){
-						ListingBO l  = (ListingBO)listings.get(k); 
+					<% for(int k=0; k < counties.size(); k++ ){
+						Counties county  = (Counties)counties.get(k); 
 				
 					%>
 					
 					<td class="td1">
 						<table>
-							<tr><td class="td1"><input  type="checkbox"  checked="checked" id="acheckAll<%=l.getListingId() %>"  onclick="checkAll(this.id, '<%=l.getListingId() %>' ) " >All</td></tr>
+							<tr><td class="td1"><input  type="checkbox"  checked="checked" id="acheckAll<%=county.getCountyId() %>"  onclick="checkAll(this.id, '<%=county.getCountyId() %>' ) " >All</td></tr>
 							
-							<tr><td colspan="2" id="<%=l.getListingId() %>" class="td1">
+							<tr><td colspan="2" id="<%=county.getCountyId() %>" class="td1">
 					
 						
 					
 							<% 
-							ArrayList<PageBO> pagesForK = l.getPagesAvailable();
+							ArrayList<PageBO> pagesForK = county.getPagesAvailable();
 							
 							
 							for(int j=0; j< pagesForK.size(); j++ ){

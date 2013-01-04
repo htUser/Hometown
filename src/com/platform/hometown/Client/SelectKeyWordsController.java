@@ -56,7 +56,7 @@ public class SelectKeyWordsController implements Controller {
 				throw new Exception("Cannot retrieve keyWordId from the parameters");
 			}
 			
-			CampaignBO campaign = new CampaignBO(cId, false, true, keyWordId);
+			CampaignBO campaign = new CampaignBO(cId, keyWordId);
 			params.put("campaign", campaign);
 			params.put("keyword",keyWordId);
 			params.put("action", "fill");
@@ -77,7 +77,7 @@ public class SelectKeyWordsController implements Controller {
 		
 		ArrayList<KeyWordsBO> keyWords = new ArrayList<KeyWordsBO>();
 		
-		String sqlString = "SELECT campaign, keyword_text, id FROM Campaign_Keywords WHERE campaign ='"+cId+"'";
+		String sqlString = "SELECT campaign, keyword_text, id FROM Campaign_Keywords WHERE campaign ='"+cId+"' ORDER BY keyword_text ASC";
 		Result result = Functions.execSQL(sqlString);
 		   int resultCode = result.getCode();
 		   if (resultCode < 0)

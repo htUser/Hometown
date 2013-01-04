@@ -9,55 +9,33 @@ import com.platform.api.Result;
 public class ListingBO {
 	String campaignId = new String();
 	String campaignKeyWordId = new String();
-	String clientId = new String();
-	String locationCountyId = new String(); 
-	String listingId = new String(); //will only be set if a listing exists in the db
-	
-	String countyName = new String();
 	String keyWordName = new String(); 
+	String listingId = new String();
 	
-	ArrayList <PageBO> pagesAvailable = new ArrayList<PageBO>();
+	public ListingBO() throws Exception{
+		 super();  
+	}
 	
-	
+	public String getListingId() {
+		return listingId;
+	}
+
+	public void setListingId(String listingId) {
+		this.listingId = listingId;
+	}
+
 	public String getKeyWordName() {
 		return keyWordName;
 	}
-
-
-
-
 
 
 	public void setKeyWordName(String keyWordName) {
 		this.keyWordName = keyWordName;
 	}
 
-
-
-
-
-
-	public String getCountyName() {
-		return countyName;
-	}
-
-
-
-
-
-
-	public void setCountyName(String countyName) {
-		this.countyName = countyName;
-	}
-	
-	
-	
-	
-	
-	
 	public void populatePagesAvailable(){
 		//select all the pages where the place is chosen for the location_county and the campaign_keyword is the same
-		String latest_value;
+		/*String latest_value;
 		try{
 			String sql = "SELECT pl.place as pName, p.place AS placeId, k.key_name, p.keyword_group AS keyWordGroupId, p.full_url, "+ 
 					"cp.id, cp.places, cp.client_county, k.id, cp.distance, cp.proximity, p.id AS pageId "+
@@ -109,71 +87,26 @@ public class ListingBO {
 			   Functions.debug("Sample:\n" + e.getMessage());        
 			}
 		
-		
+		*/
 	}
 	
-	
-	
-	
-	
-	
-	public ArrayList<PageBO> getPagesAvailable() {
-		return pagesAvailable;
-	}
-
-
-	public void setPagesAvailable(ArrayList<PageBO> pagesAvailable) {
-		this.pagesAvailable = pagesAvailable;
-	}
-
-
-	public ListingBO() throws Exception{
-		
-			 super();  
-				
-		
-	}
 	
 	
 	public void setCampaignId(String campaignId) {
 		this.campaignId = campaignId;
 	}
 
-
 	public void setCampaignKeyWordId(String campaignKeyWord) {
 		this.campaignKeyWordId = campaignKeyWord;
 	}
 
-
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
-
-	public void setLocationCountyId(String locationCountyId) {
-		this.locationCountyId = locationCountyId;
-	}
-
-
-	public String getListingId() {
-		return listingId;
-	}
-	public void setListingId(String listingId) {
-		this.listingId = listingId;
-	}
 	public String getCampaignId() {
 		return campaignId;
 	}
 	public String getCampaignKeyWordId() {
 		return campaignKeyWordId;
 	}
-	public String getClientId() {
-		return clientId;
-	}
-	public String getLocationCountyId() {
-		return locationCountyId;
-	}
-
+	
 	
 	
 

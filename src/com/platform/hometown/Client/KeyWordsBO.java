@@ -10,7 +10,9 @@ public class KeyWordsBO {
 	String KeyWordName = new String();
 	String campaignKeyWordsJunctionId = new String();
 	String siteKeyWordsJunctionId = new String();
-	ArrayList<Counties> countiesAvailable = new ArrayList<Counties>();
+	Boolean selected = false;
+	
+	ListingBO listing;
 	
 	
 	public KeyWordsBO(){
@@ -25,6 +27,15 @@ public class KeyWordsBO {
 		this.siteKeyWordsJunctionId = newSiteKeyWordsJunctionId;
 	}
 	
+	public ListingBO getListing() {
+		return listing;
+	}
+
+	public void setListing(ListingBO listing) {
+		this.listing = listing;
+	}
+
+	
 	public String getSiteKeyWordsJunctionId() {
 		return siteKeyWordsJunctionId;
 	}
@@ -32,9 +43,6 @@ public class KeyWordsBO {
 	public void setSiteKeyWordsJunctionId(String siteKeyWordsJunctionId) {
 		this.siteKeyWordsJunctionId = siteKeyWordsJunctionId;
 	}
-	
-	
-	
 	
 	
 	public String getKeyWordId() {
@@ -49,12 +57,6 @@ public class KeyWordsBO {
 	public void setKeyWordName(String keyWordName) {
 		KeyWordName = keyWordName;
 	}
-	public ArrayList<Counties> getCountiesAvailable() {
-		return countiesAvailable;
-	}
-	public void setCountiesAvailable(ArrayList<Counties> countiesAvailable) {
-		this.countiesAvailable = countiesAvailable;
-	}
 	
 	public String getCampaignKeyWordsJunctionId() {
 		return campaignKeyWordsJunctionId;
@@ -63,6 +65,13 @@ public class KeyWordsBO {
 		this.campaignKeyWordsJunctionId = campaignKeyWordsJunctionId;
 	}
 	
+	public Boolean getSelected() {
+		return selected;
+	}
+
+	public void setSelected(Boolean selected) {
+		this.selected = selected;
+	}
 	
 
 }

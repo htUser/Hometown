@@ -49,21 +49,30 @@ public class SelectBuildByKeyWordController implements Controller {
 			throw new Exception("Cannot retrieve keyWord id from the parameters");
 		}
 		
-		CampaignBO campaign = new CampaignBO(cId, false, true, keyWordId);
+		CampaignBO campaign = new CampaignBO(cId, keyWordId);
+		ArrayList<Counties> counties = campaign.getClientLocation().getCounties();
 		
 		
 		if(myAction.equals("save")==true){
 			
 			//for each page set selected if it is selected on the page
-			for(int i=0; i<campaign.getCurrentListings().size();i++){
+			for(int i=0; i<counties.size();i++){
 				
-				for(int j=0; j<campaign.getCurrentListings().get(i).getPagesAvailable().size();j++){
+				for(int j=0; j<counties.get(i).getPagesAvailable().size();j++){
 					
 					if(((String)params.get(i+"page"+j)!=null) &&((String)params.get(i+"page"+j)).length()!=0){
-							
+						Functions.debug("just before the search");
+						Functions.debug("page id is "+counties.get(i).getPagesAvailable().get(j).getPageId());
+						Functions.debug("selected keyword is "+campaign.getSelectedKeyWord());
+						Functions.debug("listing is "+campaign.getSelectedKeyWord().getListing());
+						Functions.debug("listingid is "+campaign.getSelectedKeyWord().getListing().getListingId());
+						
 						//first check if build is already in db
-						//Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND campaign equals '" + campaign.getCampaignId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
-						Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND csa_tracking equals '" + campaign.getCurrentListings().get(i).getListingId() + "'");
+						//Result checkResult = Functions.searchRecords("Build", "id","page equals '" + campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId() + "' AND csa_tracking equals '" +   campaign.getCurrentListings().get(i).getListingId() + "'");
+						Result checkResult = Functions.searchRecords("Build", "id","page equals '" + counties.get(i).getPagesAvailable().get(j).getPageId() + "' AND csa_tracking equals '" + campaign.getSelectedKeyWord().getListing().getListingId() + "'");
+						
+						Functions.debug("after search records for build");
+						
 						if(checkResult.getCode()<0){
 							String msg = "Error searching for current build.";
 							Logger.info(msg + ":\n" + checkResult.getMessage(), debug_category); 
@@ -74,11 +83,11 @@ public class SelectBuildByKeyWordController implements Controller {
 							Functions.debug("adding the build");
 							//only if no records found save to db
 							Parameters newBuildParams = Functions.getParametersInstance();
-							newBuildParams.add("page", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getPageId());
+							newBuildParams.add("page", counties.get(i).getPagesAvailable().get(j).getPageId());
 							//newBuildParams.add("campaign", campaign.getCampaignId());	
-							newBuildParams.add("csa_tracking", campaign.getCurrentListings().get(i).getListingId());	
-							newBuildParams.add("distance", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getDistance());
-							newBuildParams.add("prox_rating", campaign.getCurrentListings().get(i).getPagesAvailable().get(j).getProximity());
+							newBuildParams.add("csa_tracking", campaign.getSelectedKeyWord().getListing().getListingId());	
+							newBuildParams.add("distance", counties.get(i).getPagesAvailable().get(j).getDistance());
+							newBuildParams.add("prox_rating", counties.get(i).getPagesAvailable().get(j).getProximity());
 							
 						
 							Result result = Functions.addRecord("Build", newBuildParams);

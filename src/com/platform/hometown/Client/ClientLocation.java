@@ -43,81 +43,72 @@ public class ClientLocation {
 		//fill up the ClientLocation object
 		Functions.debug("In the ClientLocation constructor");
 		
-		locationId = loc;
+		this.fillCompanyInfo(loc);
+		this.setCountiesAvailable(fillCountiesAvailableSQL(retrievePlaces, null));
 		
-        
+		
+	}
+	
+	public ClientLocation(String loc, Boolean retrievePlaces, String campaignKeywordId) throws Exception{
+		//fill up the ClientLocation object
+		Functions.debug("In the ClientLocation constructor");
+		
+		this.fillCompanyInfo(loc);
+		this.setCountiesAvailable(fillCountiesAvailableSQL(retrievePlaces, campaignKeywordId));
+		
+		
+	}
+	
+	private void fillCompanyInfo(String loc) throws Exception{
+		this.locationId = loc;
 		//get the company info based on location id
-		
+		Functions.debug("InFillCompanyInfo");
 		String sql = "SELECT   c.company_name, c.id, pl.client2 , pl.address , pl.latitude , pl.longitude, pl.id "+
-				"FROM Primary_Locations AS pl INNER JOIN Clients as c ON c.id = pl.client2 "+
+				"FROM Primary_Locations AS pl " +
+				"INNER JOIN Clients as c " +
+				"ON c.id = pl.client2 "+
 				"WHERE pl.id = '" + locationId +"' ";
 		
 		Result result = Functions.execSQL(sql);
-		   int resultCode = result.getCode();
-		   if (resultCode < 0)
-		   {
-		      // Error occurred
-		      String msg = "Sample: Error during SQL search";
-		      Functions.debug("Sample:\n" + result.getMessage());
-		   }
-		   else if (resultCode > 0)
-		   {
-			   
-			   Functions.debug("got to the results set");
-		      // A record was found. (Otherwise, resultCode == 0)                     
-		      ParametersIterator it = result.getIterator();
-		     
-		      while(it.hasNext()){
-		    	  Parameters params = it.next();
-		    
-					c = new Client((String)params.get("client2"));
-					c.setName((String)params.get("company_name"));
-					this.address = (String)params.get("address");
-					//Functions.debug("2");
-					
-					
-					//work around for the getFloat that is not working!!!!
-					Result r = Functions.getRecord("Primary_Locations", "longitude, latitude",this.locationId );
-					if(r.getCode()>0){
-						Parameters p = r.getParameters();
-						
-						Float f = p.getFloat("longitude");
-						this.locationLong = f.doubleValue();
-						
-						f = p.getFloat("latitude");
-						this.locationLat = f.doubleValue();
-					}
-					
-					
-					//Double d = params.getDouble("longitude");
-					//Float d = (Float)params.getFloat("longitude");
-					
-					//Float f = (Float)params.getFloat("longitude");
-					//Functions.debug("2");
-					//this.locationLong =  Double.valueOf(f);
-				//	this.locationLong = f.doubleValue();
-					
-					
-			//		Functions.debug("3");
-				//	f = params.get("latitude");
-				//	this.locationLat =  Double.valueOf(f);
-					
+		int resultCode = result.getCode();
+		if (resultCode < 0)
+		{
+	      // Error occurred
+	      String msg = "Sample: Error during SQL search";
+	      Functions.debug("Sample:\n" + result.getMessage());
+	   }
+	   else if (resultCode > 0)
+	   {
+		   
+		  Functions.debug("got to the results set");
+	      // A record was found. (Otherwise, resultCode == 0)                     
+	      ParametersIterator it = result.getIterator();
+	     
+	      while(it.hasNext()){
+	    	  
+	    	  Parameters params = it.next();
+	    	  
+	    	  c = new Client((String)params.get("client2"));
+	    	  c.setName((String)params.get("company_name"));
+	    	  this.address = (String)params.get("address");
+	    	  
+	    	  //work around for the getFloat that is not working!!!!
+	    	  Result r = Functions.getRecord("Primary_Locations", "longitude, latitude",this.locationId );
+	    	  if(r.getCode()>0){
+	    		  Parameters p = r.getParameters();
+	    		  Float f = p.getFloat("longitude");
+	    		  this.locationLong = f.doubleValue();
+	    		  
+	    		  f = p.getFloat("latitude");
+	    		  this.locationLat = f.doubleValue();
+	    	  }
+	      }
 				
-		    }
-					
 		} else{
 			throw new Exception("Error trying to retrieve location data");
-		
+				
 		}
-		
-		//Functions.debug("end of constructor");
-		this.setCountiesAvailable(fillCountiesAvailableSQL(retrievePlaces));
-		
-		
-		//turn off the update functionality
-		//this.retrieveLocationPlaceRecords(this.locationId);
-		
-		
+			
 	}
 	
 	private void retrieveLocationPlaceRecords(String locId) throws Exception{
@@ -218,17 +209,21 @@ public class ClientLocation {
 	 * @param getPlaces	- Boolean, True if we populate the places available to this location 	
 	 * @throws Exception
 	 */
-	private ArrayList<Counties> fillCountiesAvailableSQL(Boolean getPlaces) throws Exception{
+	private ArrayList<Counties> fillCountiesAvailableSQL(Boolean getPlaces, String campaignKeywordId) throws Exception{
 		ArrayList <Counties> newCountiesArray= new ArrayList<Counties>();
 		
 		Functions.debug("in fillCountiesAvailable");
 		//search for all the counties available for that location 
 	
 		
-		String sql = "SELECT     c.state, c.county AS name, c.state_ab, c.id AS countyId, cc.id AS clientCountyId, cc.location, cc.county, cc.county_text, cc.client_text "+
-				 "FROM      Client_Counties AS cc "+
-				" INNER JOIN Counties AS c ON c.id = cc.county "+
-				" WHERE cc.location = '" + this.locationId +"' ORDER BY c.state ASC, c.name ASC";
+		String sql = "SELECT     c.state, c.county AS name, c.state_ab, c.id AS countyId, " +
+				"cc.id AS clientCountyId, cc.location, cc.county, cc.county_text, cc.client_text "+
+				"FROM Client_Counties AS cc "+
+				"INNER JOIN Counties AS c " +
+				"ON c.id = cc.county "+
+				"WHERE cc.location = '" + this.locationId +"' ORDER BY c.state ASC, c.name ASC";
+		
+		Functions.debug("sql is "+sql);
 		
 		Result result = Functions.execSQL(sql);
 		   int resultCode = result.getCode();
@@ -247,19 +242,14 @@ public class ClientLocation {
 		     
 		      while(it.hasNext()){
 		    	  Parameters params = it.next();
-				    //Functions.debug("params.get(county)" + (String)params.get("county"));
-			    	//Functions.debug("params.get(county_text) " + (String)params.get("county_text"));
-			    	//clientCountyId = (String)params.get("id");
-			    	
-			    	//Functions.debug("the client_county id is "+(String)params.get("id"));
-			    	//Functions.debug("the location id is "+(String)params.get("location"));
-			    	//Functions.debug("the state id is "+(String)params.get("state"));
-			    	//Functions.debug("the county id is "+(String)params.get("county"));
-				    	
-				    	
+				    			    	
 		 			Counties c = new Counties((String)params.get("state"), (String)params.get("countyId"), (String)params.get("name"), (String)params.get("state_ab"),(String)params.get("clientCountyId"), (String)params.get("client_text"));
 					c.setSelected(true);
-					//Functions.debug("county is selected"+c.getSelected());
+					
+					if((campaignKeywordId!=null)&&(campaignKeywordId.length()>0)){
+						c.fillPagesAvailable(campaignKeywordId);
+					}
+				
 					
 					if(getPlaces){
 						newCountiesArray.add(fillPlacesAvailable(c));
@@ -281,78 +271,62 @@ public class ClientLocation {
 	}
 	
 	
-	/**
-	 * Retrieves all the Counties available for this location via the locationId.
-	 * @param getPlaces	- Boolean, True if we populate the places available to this location 	
-	 * @throws Exception
-	 */
-	private ArrayList<Counties> fillCountiesAvailable(Boolean getPlaces) throws Exception{
-		ArrayList <Counties> newCountiesArray= new ArrayList<Counties>();
+	private Counties fillPlacesAvailable(Counties c) throws Exception{
+		Functions.debug("In the fillPlacesAvailable()");
+		//for each county find all the places available to choose
+		Functions.debug("finding places for "+ c.getCountyId());
 		
-		Functions.debug("in fillCountiesAvailable");
-		//search for all the counties available for that location 
-		try{
-			Result countiesResult = Functions.searchRecords("Client_Counties", "state, id, location, county, county_text, client_text","location equals '" + locationId + "'", "state", "asc","county_text", "asc", 0, 200);
-			if(countiesResult.getCode()<0){
-				throw new Exception("Error finding Counties 1");
+		ArrayList <Places> placesThisCounty = new ArrayList <Places> ();
+		Result placesResult = Functions.searchRecords("Places", "place, county_lookup, county, latitude, longitude, id, h_type","h_type contains 'ub' AND county_lookup equals '" + c.getCountyId()+"'", "place", "asc", "h_type", "desc", 0, 300);
+		//Result placesResult = Functions.searchRecords("Places", "place, county_lookup, county, latitude, longitude, id, h_type"," county_lookup equals '" + c.getCountyId()+"'", "place", "asc", "h_type", "desc", 0, 300);
+		
+		// "place", "asc", "h_type", "desc", 0, 300);
+		//Functions.debug("In the fillPlacesAvailable() 1");
+		if(placesResult.getCode()<0){
+			throw new Exception("Error finding Places"+placesResult.getCode());
 
-			}else if(countiesResult.getCode()==0){
-				//no records found
-				throw new Exception("Error finding Counties 2");
+			/*}else if(placesResult.getCode()==0){
+			//no records found
+			throw new Exception("Error finding Places 2");*/
 				
-			}else {
-				//Success
-				//Functions.debug("got the counties from the locations table");
-				
-				ParametersIterator iterator = countiesResult.getIterator();
-				while(iterator.hasNext())
-				  {
-				    Parameters params = iterator.next();
-				    	//lookup county name field from the counties table
-				    	//Functions.debug("params.get(county)" + (String)params.get("county"));
-				    	//Functions.debug("params.get(county_text) " + (String)params.get("county_text"));
-				    	//clientCountyId = (String)params.get("id");
-				    	
-				    	//Functions.debug("the client_county id is "+(String)params.get("id"));
-				    	//Functions.debug("the location id is "+(String)params.get("location"));
-				    	//Functions.debug("the state id is "+(String)params.get("state"));
-				    	//Functions.debug("the county id is "+(String)params.get("county"));
-				    	
-				    	
-				    	Result cNameResult = Functions.getRecord("Counties", "state, county, state_ab, id",(String)params.get("county") );
-						if(cNameResult.getCode()>0){
-							
-							//Functions.debug("got the county name");
-							
-							Parameters countyRecord = cNameResult.getParameters();
-							//Functions.debug("searched Counties, county name is "+(String)countyRecord.get("county"));
-							Counties c = new Counties((String)countyRecord.get("state"), (String)countyRecord.get("id"), (String)countyRecord.get("county"), (String)countyRecord.get("state_ab"),(String)params.get("id"), (String)params.get("client_text"));
-							//c.setSelected(true);
-							//Functions.debug("county is selected"+c.getSelected());
-							
-							if(getPlaces){
-								newCountiesArray.add(fillPlacesAvailable(c));
-							} else {
-								
-								newCountiesArray.add(c);
-							}
-							
-						}else {
-							throw new Exception("Error finding Counties 3");
-						}
-				    
-				  }
-				
-				
-			}
-		} catch (Exception e){
+		}else {
+			//Success
 			
-			throw e;
+			
+				
+			//Functions.debug("got the places");
+			  ParametersIterator iterator = placesResult.getIterator();
+			  while(iterator.hasNext())
+			  {
+				  
+				 Parameters params = iterator.next();
+				 
+				// Functions.debug("place id "+(String)params.get("id")+"  place is "+(String)params.get("place"));
+				   
+			    Float tempLat = params.getFloat("latitude");
+			    Float tempLong = params.getFloat("longitude");
+			    //Functions.debug("right before all Places Constructor");
+		    	try{
+		    		Places p = new Places((String)params.get("id"), (String)params.get("place"), (String)params.get("h_type"), tempLat.doubleValue(), tempLong.doubleValue());
+		    		placesThisCounty.add(p);
+		    	}catch (Exception e){
+					//catch the null exception when lat/long data is missing
+					//save it for a message for the user.
+					
+					
+				}
+		    	//Functions.debug("after places constructor");
+				
+				}
+						
+			  
 		}
 		
-		return newCountiesArray;
+		Functions.debug("In the fillPlacesAvailable()2");
+		c.setPlacesAvailable(placesThisCounty);
+		return c;
 		
-	}
+		}
 	
 	
 	
@@ -411,62 +385,7 @@ public class ClientLocation {
 		}
 	
 	
-	private Counties fillPlacesAvailable(Counties c) throws Exception{
-		Functions.debug("In the fillPlacesAvailable()");
-		//for each county find all the places available to choose
-		
-		
-		ArrayList <Places> placesThisCounty = new ArrayList <Places> ();
-		Result placesResult = Functions.searchRecords("Places", "place, county_lookup, county, latitude, longitude, id, h_type","h_type contains 'ub' AND county_lookup equals '" + c.getCountyId()+"'", "place", "asc", "h_type", "desc", 0, 300);
-		//Result placesResult = Functions.searchRecords("Places", "place, county_lookup, county, latitude, longitude, id, h_type"," county_lookup equals '" + c.getCountyId()+"'", "place", "asc", "h_type", "desc", 0, 300);
-		
-		// "place", "asc", "h_type", "desc", 0, 300);
-		//Functions.debug("In the fillPlacesAvailable() 1");
-		if(placesResult.getCode()<0){
-			throw new Exception("Error finding Places"+placesResult.getCode());
-
-		}else if(placesResult.getCode()==0){
-			//no records found
-			throw new Exception("Error finding Places 2");
-				
-		}else {
-			//Success
-			
-			
-				
-			//Functions.debug("got the places");
-			  ParametersIterator iterator = placesResult.getIterator();
-			  while(iterator.hasNext())
-			  {
-				  
-				 Parameters params = iterator.next();
-				 
-				// Functions.debug("place id "+(String)params.get("id")+"  place is "+(String)params.get("place"));
-				   
-			    Float tempLat = params.getFloat("latitude");
-			    Float tempLong = params.getFloat("longitude");
-			    //Functions.debug("right before all Places Constructor");
-		    	try{
-		    		Places p = new Places((String)params.get("id"), (String)params.get("place"), (String)params.get("h_type"), tempLat.doubleValue(), tempLong.doubleValue());
-		    		placesThisCounty.add(p);
-		    	}catch (Exception e){
-					//catch the null exception when lat/long data is missing
-					//save it for a message for the user.
-					
-					
-				}
-		    	//Functions.debug("after places constructor");
-				
-				}
-						
-			  
-		}
-		
-		Functions.debug("In the fillPlacesAvailable()2");
-		c.setPlacesAvailable(placesThisCounty);
-		return c;
-		
-		}
+	
 	
 	public double getLocationLong(){
 		return locationLong;
