@@ -114,8 +114,6 @@ public class ThirdPartyRequestProcessor
 					Parameters ljParams = dm.prepareLJParams();
 					ljParams.add("formType",formType);
 					
-					//update record in LJ, not add a new record
-					
 					
 					Result result = addRecordToLJ(objectId, ljParams);
 					if(result.getCode() < 0)
@@ -128,13 +126,16 @@ public class ThirdPartyRequestProcessor
 				
 				} else if(formType.equals(DataMapper.REVIEW_RESPONSE))
 				{
-					Logger.info("In the processRequest() for Client-Review-Response", "NewThirdPartyRequestProcessor");
-					Functions.debug("In the else of processRequest()");
+					//Logger.info("In the processRequest() for Client-Review-Response", "NewThirdPartyRequestProcessor");
+					//Functions.debug("In the else of processRequest()");
 					String objectId = getObjectId(this.formType);
 					
 					DataMapper dm = new DataMapper(this.formType, requestData);
 					Parameters ljParams = dm.prepareLJParams();
 					ljParams.add("formType",formType);
+					
+					
+					//update record in LJ, not add a new record
 					
 					Result result = updateRecordToLJ(objectId, ljParams);
 					if(result.getCode() < 0)
@@ -145,6 +146,30 @@ public class ThirdPartyRequestProcessor
 					}
 					
 				
+				} else if(formType.equals(DataMapper.CLIENT_SURVEY_POST))
+				{
+					Functions.debug("Client Survey Post In the else of processRequest()");
+					String objectId = getObjectId(this.formType);
+					
+					DataMapper dm = new DataMapper(this.formType, requestData);
+					Parameters ljParams = dm.prepareLJParams();
+					ljParams.add("formType",formType);
+					
+					Result result = addRecordToLJ(objectId, ljParams);
+					if(result.getCode() < 0)
+					{
+						//throw new Exception("Unable to add Record");
+						Functions.debug("Unable to add Record"+"\n"+requestData);
+						sendErrorEmail("Client Survey Post");
+						
+					} else {
+						Functions.debug("Survey Record Added");
+					}
+					
+					
+					
+					
+					
 				}
 				
 			}	
@@ -218,6 +243,9 @@ public class ThirdPartyRequestProcessor
 		} else if (formType.equals(DataMapper.REVIEW_POST) || formType.equals(DataMapper.REVIEW_RESPONSE))
 		{
 			return "Project_Costs";
+		} else if (formType.equals(DataMapper.CLIENT_SURVEY_POST))
+		{
+			return "Surveys";
 		}
 		else
 		{

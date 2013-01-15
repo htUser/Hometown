@@ -16,6 +16,7 @@ public class DataMapper
 	public static String E_PROSPECT_POST = "eprospect-post";
 	public static String REVIEW_POST = "review-post";
 	public static String REVIEW_RESPONSE = "review-response-post";
+	public static String CLIENT_SURVEY_POST = "client-survey-post";
 	
 	private String type;
 	private Map<String,String[]> dataMap;
@@ -45,7 +46,7 @@ public class DataMapper
 			String ljField = e.getValue();
 			
 			Object fieldValue = getFieldValue(this.dataMap.get(thirdPartyField));
-			//Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
+			Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
 			 
 			if(fieldValue != null)
 			{
@@ -168,6 +169,46 @@ public class DataMapper
 		return reviewMap;
 	}
 	
+	public Map<String,String> getClientSurveyMap()
+	{
+		Functions.debug("in getClientSurveyMap()");
+		
+		Map<String,String> reviewMap = new HashMap<String,String>();
+		reviewMap.put("Field215","company_name");
+		reviewMap.put("Field223","contact");
+		reviewMap.put("Field225","comments_satisfaction");
+		reviewMap.put("Field211","suggestions_for_improvement");
+		reviewMap.put("Field227","ad_rating");
+		reviewMap.put("Field228","customer_service_rating");
+		reviewMap.put("Field229","price_rating");
+		reviewMap.put("Field230","lead_quality_rating");
+		reviewMap.put("Field231","ltc_rating");
+		reviewMap.put("Field232","client_satisfaction_level");
+		reviewMap.put("Field327","recommend_hometown");
+		reviewMap.put("Field428","permission");
+		reviewMap.put("Field213","client2");
+		
+		
+		/*
+		 * Field215    company_name
+			Field223    contact (lookup field - do we send this across to form in email?)
+			Field225    comments_satisfaction
+			Field211    suggestions_for_improvement
+			Field227    ad_rating
+			Field228    customer_service_rating
+			Field229    price_rating
+			Field230    lead_quality_rating
+			Field231    ltc_rating
+			Field232    client_satisfaction_level
+			Field327    recommend_hometown  (Y/N - will it work?)
+			Field428    permission
+			Field213    client2 (lookup - sent across to form in email?)*/
+		 
+		
+				
+		return reviewMap;
+	}
+	
 
 	Map<String,String> getFieldsMap(String type) throws Exception
 	{
@@ -183,6 +224,8 @@ public class DataMapper
 			return getReviewMap();
 		else if(type.equals(REVIEW_RESPONSE))
 			return getClientResponseMap();
+		else if(type.equals(CLIENT_SURVEY_POST))
+			return getClientSurveyMap();
 		else
 		{
 			Functions.debug("Invalid form type");
@@ -318,6 +361,21 @@ public class DataMapper
     		
     		ljParams.add("resp_rec_date",dateFormat.format(date));
 				
+		}
+		
+		if(type.equals(CLIENT_SURVEY_POST))
+		{    		
+    		ljParams.add("survey_type","Satisfaction");
+    		ljParams.add("survey_status","New");
+    		
+    		String permission = ljParams.get("permission");
+    		Functions.debug("Permission is " + permission);
+    		if((permission==null)||(permission.length()==0)){
+    			//if permission variable was not sent over - then default to No
+    			Functions.debug("in the if");
+    			ljParams.add("permission", "No");
+    			
+    		}
 		}
 		
 		return ljParams;
