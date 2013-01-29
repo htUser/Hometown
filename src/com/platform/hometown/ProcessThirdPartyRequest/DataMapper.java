@@ -46,7 +46,7 @@ public class DataMapper
 			String ljField = e.getValue();
 			
 			Object fieldValue = getFieldValue(this.dataMap.get(thirdPartyField));
-			Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
+			//Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
 			 
 			if(fieldValue != null)
 			{
