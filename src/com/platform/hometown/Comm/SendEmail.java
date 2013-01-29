@@ -4,6 +4,44 @@ import com.platform.api.*;
 
 public class SendEmail {
 	
+	
+	public void sendExitSurveyEmail(Parameters p) throws Exception{
+		Functions.debug("In SendExitSurveyEmail");
+		String debug_category = "SendExitSurveyEmail";
+		
+	
+		
+		String commId = p.get("id");
+		String contactEmail = p.get("contact_email");
+		String cc = "support@hometown.net";
+		//String cc ="sarahmettler2@gmail.com";
+		String bodyTemplateID = "ce6834fb4b8240558341474b7509907e";
+		String attachmentIdList = "";
+		String docId = p.get("document");		
+		String attachmentTemplateIdList = docId;
+		String subject = "We're sorry to see you go...";
+		
+		
+		
+		try{
+			
+			Result sendEmailResult = Functions.sendEmailUsingTemplate("Comms", commId, contactEmail, cc, subject, bodyTemplateID, attachmentTemplateIdList, attachmentIdList);
+		
+			
+			if(sendEmailResult.getCode()<0){
+				//an error occurred
+				Logger.error("Error sending exit survey email: " +sendEmailResult.getMessage(), debug_category);
+				throw new Exception();
+			}
+		
+		}catch(Exception e){
+			Logger.info("caught the exception", debug_category);
+			throw new Exception();
+			
+		}
+		
+	}
+	
 	public void sendPropCommEmail(Parameters p) throws Exception{
 		String debug_category = "sendPropCommEmail";
 		String bodyTemplateID = new String();
