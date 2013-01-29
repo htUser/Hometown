@@ -67,28 +67,31 @@ public class ProjectDetails {
 		
 
 		Result result = Functions.getRecord("Clients", "email, cc_reviews_contact", clientId);
-		//Functions.debug("after getRecord, code is "+result.getCode());
+		Functions.debug("after getRecord, code is "+result.getCode());
 		
 		if(result.getCode()>0){
 			Parameters p = result.getParameters();
 			c.setEmail((String)p.get("email"));
-			//Functions.debug("email "+c.getEmail());
+			Functions.debug("email "+c.getEmail());
 			
 			//lookup the cc contact's email
 			String ccId = (String)p.get("cc_reviews_contact");
-			//Functions.debug("ccReviews to contact id "+ccId);
+			Functions.debug("ccReviews to contact id "+ccId);
 			
-			Result ccResult = Functions.getRecord("Contacts_HT", "email", ccId);
-			//Functions.debug("after getRecord, code is "+ccResult.getCode());
+			if((ccId!=null)&&(ccId.length()>0)){
 			
-			if(ccResult.getCode()>0){
-				Parameters ccP = ccResult.getParameters();
-				c.setCcReviewsContact((String)ccP.get("email"));
-			} else {
-				Logger.info("No contact record found for cc: contact id " + ccId, debug_category);
-				Logger.error("No contact record found for cc: contact id " + ccId, debug_category);
-				throw new Exception();
+				Result ccResult = Functions.getRecord("Contacts_HT", "email", ccId);
+				Functions.debug("after getRecord, code is "+ccResult.getCode());
+			
+				if(ccResult.getCode()>0){
+					Parameters ccP = ccResult.getParameters();
+					c.setCcReviewsContact((String)ccP.get("email"));
+				} else {
+					Logger.info("No contact record found for cc: contact id " + ccId, debug_category);
+					Logger.error("No contact record found for cc: contact id " + ccId, debug_category);
+					throw new Exception();
 				
+				}
 			}
 				
 			
