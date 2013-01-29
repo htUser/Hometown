@@ -17,6 +17,7 @@ public class DataMapper
 	public static String REVIEW_POST = "review-post";
 	public static String REVIEW_RESPONSE = "review-response-post";
 	public static String CLIENT_SURVEY_POST = "client-survey-post";
+	public static String EXIT_SURVEY_POST = "exit-survey-post";
 	
 	private String type;
 	private Map<String,String[]> dataMap;
@@ -46,7 +47,7 @@ public class DataMapper
 			String ljField = e.getValue();
 			
 			Object fieldValue = getFieldValue(this.dataMap.get(thirdPartyField));
-			//Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
+			Functions.debug("Key = " + thirdPartyField + " Value = " + fieldValue);	
 			 
 			if(fieldValue != null)
 			{
@@ -171,7 +172,7 @@ public class DataMapper
 	
 	public Map<String,String> getClientSurveyMap()
 	{
-		Functions.debug("in getClientSurveyMap()");
+		//Functions.debug("in getClientSurveyMap()");
 		
 		Map<String,String> reviewMap = new HashMap<String,String>();
 		reviewMap.put("Field215","company_name");
@@ -186,27 +187,29 @@ public class DataMapper
 		reviewMap.put("Field232","client_satisfaction_level");
 		reviewMap.put("Field327","recommend_hometown");
 		reviewMap.put("Field428","permission");
-		reviewMap.put("Field213","client2");
-		
-		
-		/*
-		 * Field215    company_name
-			Field223    contact (lookup field - do we send this across to form in email?)
-			Field225    comments_satisfaction
-			Field211    suggestions_for_improvement
-			Field227    ad_rating
-			Field228    customer_service_rating
-			Field229    price_rating
-			Field230    lead_quality_rating
-			Field231    ltc_rating
-			Field232    client_satisfaction_level
-			Field327    recommend_hometown  (Y/N - will it work?)
-			Field428    permission
-			Field213    client2 (lookup - sent across to form in email?)*/
-		 
-		
+		reviewMap.put("Field213","client2");		
 				
 		return reviewMap;
+	}
+	
+	public Map<String,String> getExitSurveyMap()
+	{
+		Functions.debug("in getExitSurveyMap()");
+		
+		Map<String,String> exitSurveyMap = new HashMap<String,String>();
+		exitSurveyMap.put("Field233","company_name");
+		exitSurveyMap.put("Field234","contact");
+		exitSurveyMap.put("Field231","comments_satisfaction");
+		exitSurveyMap.put("Field211","suggestions_for_improvement");
+		exitSurveyMap.put("Field208","client_satisfaction_level");
+		exitSurveyMap.put("Field222","recommend_hometown");
+		exitSurveyMap.put("Field235","client2");
+		exitSurveyMap.put("Field228","comments_cancellation");
+		exitSurveyMap.put("Field227","reason_for_leaving");
+		exitSurveyMap.put("Field220","re_sign_with_hometown");
+		
+				
+		return exitSurveyMap;
 	}
 	
 
@@ -226,6 +229,8 @@ public class DataMapper
 			return getClientResponseMap();
 		else if(type.equals(CLIENT_SURVEY_POST))
 			return getClientSurveyMap();
+		else if(type.equals(EXIT_SURVEY_POST))
+			return getExitSurveyMap();
 		else
 		{
 			Functions.debug("Invalid form type");
@@ -369,13 +374,21 @@ public class DataMapper
     		ljParams.add("survey_status","New");
     		
     		String permission = ljParams.get("permission");
-    		Functions.debug("Permission is " + permission);
+    		//Functions.debug("Permission is " + permission);
     		if((permission==null)||(permission.length()==0)){
     			//if permission variable was not sent over - then default to No
-    			Functions.debug("in the if");
+    			//Functions.debug("in the if");
     			ljParams.add("permission", "No");
     			
     		}
+		}
+		
+		if(type.equals(EXIT_SURVEY_POST))
+		{    		
+    		ljParams.add("survey_type","Exit");
+    		ljParams.add("survey_status","New");
+    		
+    		
 		}
 		
 		return ljParams;

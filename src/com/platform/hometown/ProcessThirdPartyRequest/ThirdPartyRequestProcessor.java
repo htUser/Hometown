@@ -148,7 +148,7 @@ public class ThirdPartyRequestProcessor
 				
 				} else if(formType.equals(DataMapper.CLIENT_SURVEY_POST))
 				{
-					Functions.debug("Client Survey Post In the else of processRequest()");
+					//Functions.debug("Client Survey Post In the else of processRequest()");
 					String objectId = getObjectId(this.formType);
 					
 					DataMapper dm = new DataMapper(this.formType, requestData);
@@ -166,10 +166,32 @@ public class ThirdPartyRequestProcessor
 						Functions.debug("Survey Record Added");
 					}
 					
+			
+				}else if(formType.equals(DataMapper.EXIT_SURVEY_POST))
+				{
+					//Functions.debug("Exit Survey Post In the else of processRequest()");
 					
+					String objectId = getObjectId(this.formType);
 					
+					DataMapper dm = new DataMapper(this.formType, requestData);
 					
+					Parameters ljParams = dm.prepareLJParams();
 					
+					ljParams.add("formType",formType);
+					
+					Result result = addRecordToLJ(objectId, ljParams);
+					
+					if(result.getCode() < 0)
+					{
+						//throw new Exception("Unable to add Record");
+						Functions.debug("Unable to add Record"+"\n"+requestData);
+						sendErrorEmail("Exit Survey Post");
+						
+					} else {
+						Functions.debug("Exit Survey Record Added");
+					}
+					
+			
 				}
 				
 			}	
@@ -246,10 +268,13 @@ public class ThirdPartyRequestProcessor
 		} else if (formType.equals(DataMapper.CLIENT_SURVEY_POST))
 		{
 			return "Surveys";
+		} else if (formType.equals(DataMapper.EXIT_SURVEY_POST))
+		{
+			return "Surveys";
 		}
 		else
 		{
-			throw new Exception("Invalid object");
+			throw new Exception("getObjectId() Invalid Long Jump object name");
 		}
 	}
 }
