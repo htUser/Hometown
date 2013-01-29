@@ -158,7 +158,7 @@ String getPropEmail(String propId) throws Exception{
 	
 	public void sendEmail(Parameters p) throws Exception{
 		String debug_category = "Comms/sendEmail";
-		Logger.info("In sendEmail", debug_category); 
+		Functions.debug("In sendEmail"); 
 		
 		//get the info from the params 
 		String commId = p.get("id");
@@ -167,6 +167,9 @@ String getPropEmail(String propId) throws Exception{
 		String body = p.get("main_message");
 		String docId = p.get("document");
 		String cc = p.get("blind_copy_to");
+		//String bodyTemplateID = "6526b0cfbe9843cb90a3934dbdb9f662";
+		String bodyTemplateID = p.get("body_template_id");
+		Functions.debug("body template id is "+ bodyTemplateID);  
 		
 		
 		if((commId!=null)&&(commId.length()!=0)){
@@ -194,7 +197,6 @@ String getPropEmail(String propId) throws Exception{
 			String attachmentTemplateIdList = docId;
 			
 			
-			String bodyTemplateID = "6526b0cfbe9843cb90a3934dbdb9f662";
 			
 			
 			try{
